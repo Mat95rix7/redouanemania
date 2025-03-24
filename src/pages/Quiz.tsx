@@ -23,6 +23,8 @@ const Quiz = () => {
 
   // Generate a random multiplication question
   const generateQuestion = useCallback(() => {
+    if (selectedTables.length === 0) return;
+    
     const randomTableIndex = Math.floor(Math.random() * selectedTables.length);
     const table = selectedTables[randomTableIndex];
     const number = Math.floor(Math.random() * 10) + 1;
@@ -31,22 +33,20 @@ const Quiz = () => {
     setCorrectAnswer(table * number);
   }, [selectedTables]);
 
+  // Initialize the quiz
   useEffect(() => {
+    // Redirect if no tables are selected
     if (selectedTables.length === 0) {
       navigate('/select-tables');
       return;
     }
     
-    // Fix the infinite loop - only reset on initial mount
-    const initialSetup = () => {
-      resetGameResults();
-      setCorrectCount(0);
-      setTotalTime(0);
-      setCurrentQuestion(0);
-      generateQuestion();
-    };
-    
-    initialSetup();
+    // Setup the initial quiz state
+    resetGameResults();
+    setCorrectCount(0);
+    setTotalTime(0);
+    setCurrentQuestion(0);
+    generateQuestion();
     
     // Initial animation delay
     const timer = setTimeout(() => {
