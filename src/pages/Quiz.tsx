@@ -37,11 +37,16 @@ const Quiz = () => {
       return;
     }
     
-    resetGameResults();
-    setCorrectCount(0);
-    setTotalTime(0);
-    setCurrentQuestion(0);
-    generateQuestion();
+    // Fix the infinite loop - only reset on initial mount
+    const initialSetup = () => {
+      resetGameResults();
+      setCorrectCount(0);
+      setTotalTime(0);
+      setCurrentQuestion(0);
+      generateQuestion();
+    };
+    
+    initialSetup();
     
     // Initial animation delay
     const timer = setTimeout(() => {
@@ -49,7 +54,7 @@ const Quiz = () => {
     }, 300);
     
     return () => clearTimeout(timer);
-  }, [navigate, resetGameResults, selectedTables.length, generateQuestion]);
+  }, [navigate, selectedTables, resetGameResults, generateQuestion]);
 
   const handleAnswer = (userAnswer: number, timeSpent: number) => {
     const isCorrect = userAnswer === correctAnswer;
@@ -60,7 +65,7 @@ const Quiz = () => {
     } else {
       toast('Mauvaise réponse', { 
         description: `La réponse était ${correctAnswer}`,
-        variant: 'destructive' 
+        style: { backgroundColor: 'rgb(239, 68, 68)', color: 'white' } 
       });
     }
     
