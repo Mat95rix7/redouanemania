@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameContext } from '../context/GameContext';
@@ -13,10 +12,10 @@ const SelectTables = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleSelectTable = (table: number) => {
-    setSelectedTables(prev => 
-      prev.includes(table) 
-        ? prev.filter(t => t !== table) 
-        : [...prev, table]
+    setSelectedTables(
+      selectedTables.includes(table) 
+        ? selectedTables.filter(t => t !== table) 
+        : [...selectedTables, table]
     );
     setError(null);
   };

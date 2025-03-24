@@ -7,7 +7,7 @@ import QuizCard from '../components/QuizCard';
 import { Progress } from '@/components/ui/progress';
 import { Clock, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const TOTAL_QUESTIONS = 10;
 
