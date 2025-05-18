@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ArrowLeft } from 'lucide-react';
 import { useGameContext } from '../context/GameContext';
 import { cn } from '@/lib/utils';
 
@@ -23,12 +22,20 @@ const Index = () => {
     e.preventDefault();
     if (inputValue.trim()) {
       setUsername(inputValue.trim());
-      navigate('/select-tables');
+      navigate('/game1/select-tables');
     }
   };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-6">
+      <button
+        onClick={() => navigate('/')}
+        className="absolute top-4 left-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Retour
+      </button>
+
       <div 
         className={cn(
           "max-w-md w-full transition-all duration-500 transform",
