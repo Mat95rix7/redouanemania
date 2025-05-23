@@ -19,6 +19,7 @@ const ConjugaisonGame: React.FC<ConjugationGameProps> = ({
   const [userAnswers, setUserAnswers] = useState<Partial<ConjugaisonParTemps>>({});
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [validatedAnswers, setValidatedAnswers] = useState<Record<Pronom, boolean>>({} as Record<Pronom, boolean>);
+  const [showResult, setShowResult] = useState<"correct" | "incorrect" | null>(null);
 
   // Définir l'ordre des pronoms
   const pronomsOrder: Pronom[] = ["je", "tu", "il/elle", "nous", "vous", "ils/elles"];
@@ -87,6 +88,12 @@ const ConjugaisonGame: React.FC<ConjugationGameProps> = ({
     });
 
     setValidatedAnswers(newValidatedAnswers);
+    setShowResult(allCorrect ? "correct" : "incorrect");
+
+    // Masquer le résultat après 1.5 secondes
+    setTimeout(() => {
+      setShowResult(null);
+    }, 1500);
 
     if (allCorrect) {
       setMessage({ text: 'Bravo ! Toutes les réponses sont correctes !', type: 'success' });
@@ -107,11 +114,20 @@ const ConjugaisonGame: React.FC<ConjugationGameProps> = ({
     setUserAnswers(initialAnswers);
     setMessage(null);
     setValidatedAnswers({} as Record<Pronom, boolean>);
+    setShowResult(null);
     if (onReset) onReset();
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {showResult && (
+        <div className={`absolute inset-0 flex items-center justify-center bg-${showResult === "correct" ? "green" : "red"}-500/20 backdrop-blur-sm rounded-lg z-10`}>
+          <div className={`text-6xl font-bold text-${showResult === "correct" ? "green" : "red"}-500`}>
+            {showResult === "correct" ? "Correct !" : "Incorrect !"}
+          </div>
+        </div>
+      )}
+      
       <div className="grid gap-4">
         {pronomsOrder.map((pronom) => (
           <div key={pronom} className="flex items-center gap-4">

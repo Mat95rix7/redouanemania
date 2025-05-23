@@ -12,6 +12,22 @@ const BASE_POINTS = 10;
 const MAX_TIME_BONUS = 5; // Points bonus maximum pour la rapidité
 const TIME_THRESHOLD = 5; // Seuil de temps en secondes pour le bonus maximum
 
+// Système de points
+const SCORING_SYSTEM = {
+  CORRECT_ANSWER: 100,
+  SPEED_BONUS: {
+    UNDER_3_SEC: 50,
+    UNDER_5_SEC: 30,
+    UNDER_8_SEC: 10
+  },
+  STREAK_BONUS: {
+    STREAK_3: 25,
+    STREAK_5: 50,
+    STREAK_7: 75,
+    STREAK_10: 100
+  }
+};
+
 // Fonction pour calculer la complexité d'une opération
 const calculateComplexity = (num1: number, num2: number): number => {
   // Plus les nombres sont grands, plus c'est complexe
@@ -54,6 +70,8 @@ const Quiz = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [points, setPoints] = useState(0);
+  const [showResult, setShowResult] = useState<"correct" | "incorrect" | null>(null);
+  const [currentStreak, setCurrentStreak] = useState(0);
   const navigate = useNavigate();
 
   const generateQuestion = useCallback(() => {
@@ -103,43 +121,63 @@ const Quiz = () => {
     let questionPoints = 0;
     
     if (isCorrect) {
+      // Points de base pour réponse correcte
+      questionPoints += SCORING_SYSTEM.CORRECT_ANSWER;
+      
+      // Bonus de vitesse
+      if (timeSpent < 3) {
+        questionPoints += SCORING_SYSTEM.SPEED_BONUS.UNDER_3_SEC;
+      } else if (timeSpent < 5) {
+        questionPoints += SCORING_SYSTEM.SPEED_BONUS.UNDER_5_SEC;
+      } else if (timeSpent < 8) {
+        questionPoints += SCORING_SYSTEM.SPEED_BONUS.UNDER_8_SEC;
+      }
+      
+      // Mise à jour de la série
+      const newStreak = currentStreak + 1;
+      setCurrentStreak(newStreak);
+      
+      // Bonus de série
+      if (newStreak >= 10) {
+        questionPoints += SCORING_SYSTEM.STREAK_BONUS.STREAK_10;
+      } else if (newStreak >= 7) {
+        questionPoints += SCORING_SYSTEM.STREAK_BONUS.STREAK_7;
+      } else if (newStreak >= 5) {
+        questionPoints += SCORING_SYSTEM.STREAK_BONUS.STREAK_5;
+      } else if (newStreak >= 3) {
+        questionPoints += SCORING_SYSTEM.STREAK_BONUS.STREAK_3;
+      }
+      
       setCorrectCount(prev => prev + 1);
-      
-      // Extraire les nombres de l'opération
-      const [num1, num2] = operation.split('×').map(n => parseInt(n.trim()));
-      
-      // Calculer la complexité et les points de base
-      const complexity = calculateComplexity(num1, num2);
-      const basePoints = Math.round(BASE_POINTS * complexity);
-      
-      // Calculer le bonus de temps
-      const timeBonus = Math.round(calculateTimeBonus(timeSpent));
-      
-      // Total des points pour cette question
-      questionPoints = basePoints + timeBonus;
-      
       setPoints(prev => prev + questionPoints);
+    } else {
+      // Réinitialiser la série en cas d'erreur
+      setCurrentStreak(0);
     }
     
-    // Record the result
+    // Enregistrer le résultat
     addGameResult({
       operation,
       userAnswer,
       correctAnswer,
-      timeSpent,
       isCorrect,
+      timeSpent,
       points: questionPoints
     });
     
     setTotalTime(prev => prev + timeSpent);
     
-    // Passer à la question suivante immédiatement
-    if (currentQuestion < TOTAL_QUESTIONS - 1) {
-      setCurrentQuestion(prev => prev + 1);
-    } else {
-      // Quiz completed
-      navigate('/game1/results', { replace: true });
-    }
+    setShowResult(isCorrect ? "correct" : "incorrect");
+    setTimeout(() => {
+      setShowResult(null);
+      
+      if (currentQuestion < TOTAL_QUESTIONS - 1) {
+        setCurrentQuestion(prev => prev + 1);
+      } else {
+        // Quiz terminé, rediriger vers la page des résultats
+        navigate('/game1/results', { replace: true });
+      }
+    }, 1500);
   };
 
   const progress = ((currentQuestion + 1) / TOTAL_QUESTIONS) * 100;
@@ -149,44 +187,56 @@ const Quiz = () => {
       <Header />
       
       <main className="flex-1 container max-w-4xl mx-auto px-6 py-8">
-        <div className="mb-8 animate-fade-in">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-2xl font-bold text-blue-600 bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
-              Question {currentQuestion + 1}/{TOTAL_QUESTIONS}
+        <div className="relative">
+          {showResult && (
+            <div className={`absolute inset-0 flex items-center justify-center bg-${showResult === "correct" ? "green" : "red"}-500/20 backdrop-blur-sm rounded-lg z-10`}>
+              <div className={`text-6xl font-bold text-${showResult === "correct" ? "green" : "red"}-500`}>
+                {showResult === "correct" ? "Correct !" : "Incorrect !"}
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-xl bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
-                <Trophy className="h-6 w-6 text-yellow-500" />
-                <span className="font-bold">{points}</span>
+          )}
+          
+          <div className="bg-white/80 rounded-3xl p-8 shadow-xl border-2 border-blue-200">
+            <div className="mb-8 animate-fade-in">
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-2xl font-bold text-blue-600 bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
+                  Question {currentQuestion + 1}/{TOTAL_QUESTIONS}
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 text-xl bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
+                    <Trophy className="h-6 w-6 text-yellow-500" />
+                    <span className="font-bold">{points}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xl bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
+                    <Clock className="h-6 w-6 text-blue-500" />
+                    <span className="font-bold">{totalTime.toFixed(1)}s</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xl bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
+                    <Check className="h-6 w-6 text-green-500" />
+                    <span className="font-bold">{correctCount}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-xl bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
-                <Clock className="h-6 w-6 text-blue-500" />
-                <span className="font-bold">{totalTime.toFixed(1)}s</span>
-              </div>
-              <div className="flex items-center gap-2 text-xl bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
-                <Check className="h-6 w-6 text-green-500" />
-                <span className="font-bold">{correctCount}</span>
-              </div>
+              <Progress 
+                value={progress} 
+                className="h-4 bg-white/50 rounded-full overflow-hidden"
+              />
+            </div>
+            
+            <div 
+              className={cn(
+                "flex justify-center transition-all duration-500",
+                isLoading ? "opacity-0 scale-95" : "opacity-100 scale-100"
+              )}
+            >
+              <QuizCard
+                operation={operation}
+                correctAnswer={correctAnswer}
+                onAnswer={handleAnswer}
+                isActive={!isLoading}
+              />
             </div>
           </div>
-          <Progress 
-            value={progress} 
-            className="h-4 bg-white/50 rounded-full overflow-hidden"
-          />
-        </div>
-        
-        <div 
-          className={cn(
-            "flex justify-center transition-all duration-500",
-            isLoading ? "opacity-0 scale-95" : "opacity-100 scale-100"
-          )}
-        >
-          <QuizCard
-            operation={operation}
-            correctAnswer={correctAnswer}
-            onAnswer={handleAnswer}
-            isActive={!isLoading}
-          />
         </div>
       </main>
     </div>
