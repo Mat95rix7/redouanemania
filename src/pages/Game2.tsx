@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Clock, Trophy, CheckCircle, XCircle } from 'lucide-react';
 import { useGameContext } from '../context/GameContext.tsx';
+import { cn } from '@/lib/utils';
 
 interface Multiplication {
   num1: number;
@@ -132,19 +133,23 @@ const Game2 = () => {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
-      <div className="bg-white rounded-xl p-4 shadow-lg">
-        <h3 className="text-lg font-bold mb-3">Mon historique</h3>
-        <div className="space-y-2">
+      <div className="bg-white/80 rounded-2xl p-6 shadow-xl border-2 border-blue-200">
+        <h3 className="text-2xl font-bold text-blue-600 mb-4">Mon historique</h3>
+        <div className="space-y-3">
           {userResults.map((result, index) => (
-            <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">{formatDate(result.date)}</span>
+            <div 
+              key={index} 
+              className="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm border border-blue-100 hover:scale-[1.02] transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <Trophy className="h-5 w-5 text-yellow-500" />
+                <span className="text-lg text-blue-600">{formatDate(result.date)}</span>
               </div>
-              <span className="font-bold text-primary">{result.score}/20</span>
+              <span className="text-xl font-bold text-blue-600">{result.score}/20</span>
             </div>
           ))}
           {userResults.length === 0 && (
-            <div className="text-center text-gray-500 py-4">
+            <div className="text-center text-blue-500 py-6 text-lg">
               Aucun résultat enregistré
             </div>
           )}
@@ -154,49 +159,71 @@ const Game2 = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
       <button
         onClick={() => navigate('/')}
-        className="absolute top-4 left-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-4 left-4 flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors bg-white/80 px-4 py-2 rounded-xl shadow-sm"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-5 h-5" />
         Retour
       </button>
 
       <div className="max-w-6xl w-full flex gap-6">
-        <div className="flex-1 bg-white rounded-2xl p-8 shadow-lg">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">
-              Multiplication Rapide (20 questions)
+        <div className="flex-1 bg-white/80 rounded-3xl p-8 shadow-xl border-2 border-blue-200">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-blue-600">
+              Multiplication Rapide
             </h2>
-            <div className="text-lg font-medium">
-              Temps: {formatTime(timeLeft)}
+            <div className="flex items-center gap-2 text-xl font-bold text-blue-600 bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
+              <Clock className="h-6 w-6" />
+              {formatTime(timeLeft)}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
             {multiplications.map((m, index) => (
-              <div key={index} className={`p-4 rounded-lg ${isGameOver ? 'bg-gray-50' : 'bg-gray-50'}`}>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="text-2xl font-bold text-gray-800">
-                    {m.num1} × {m.num2} =
+              <div 
+                key={index} 
+                className={cn(
+                  "p-6 rounded-2xl transition-all duration-300",
+                  "border-2 shadow-lg",
+                  isGameOver 
+                    ? parseInt(m.userAnswer) === m.answer
+                      ? "bg-green-50 border-green-200"
+                      : "bg-red-50 border-red-200"
+                    : "bg-white/50 border-blue-200 hover:border-blue-300"
+                )}
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="text-3xl font-bold text-blue-600">
+                    {m.num1} × {m.num2}
                   </div>
                   {!isGameOver ? (
                     <input
                       type="number"
                       value={m.userAnswer}
                       onChange={(e) => handleAnswerChange(index, e.target.value)}
-                      className="w-24 px-3 py-2 rounded-lg border text-center text-lg font-medium focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                      className="w-32 px-4 py-3 rounded-xl border-2 text-center text-2xl font-bold focus:ring-4 focus:ring-blue-500/50 focus:outline-none bg-white/80"
                       placeholder="?"
                     />
                   ) : (
-                    <div className="flex flex-col items-center gap-1">
-                      <div className={`text-xl font-bold ${parseInt(m.userAnswer) === m.answer ? 'text-green-600' : 'text-red-600'}`}>
-                        {m.answer}
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="text-2xl font-bold">
+                        {parseInt(m.userAnswer) === m.answer ? (
+                          <div className="flex items-center gap-2 text-green-600">
+                            <CheckCircle className="h-6 w-6" />
+                            {m.answer}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 text-red-600">
+                            <XCircle className="h-6 w-6" />
+                            {m.answer}
+                          </div>
+                        )}
                       </div>
                       {parseInt(m.userAnswer) !== m.answer && (
-                        <div className="text-sm text-red-500">
-                          Votre réponse: {m.userAnswer || 'Non répondu'}
+                        <div className="text-lg text-red-500">
+                          Ta réponse: {m.userAnswer || 'Non répondu'}
                         </div>
                       )}
                     </div>
@@ -209,42 +236,61 @@ const Game2 = () => {
           {!isGameOver ? (
             <button
               onClick={handleSubmit}
-              className="w-full py-3 px-4 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition-colors"
+              className={cn(
+                "w-full py-4 rounded-2xl text-xl font-bold transition-all",
+                "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
+                "hover:from-blue-600 hover:to-purple-600",
+                "transform hover:scale-[1.02] active:scale-[0.98]",
+                "shadow-lg focus:ring-4 focus:ring-primary/30 focus:outline-none"
+              )}
             >
-              Valider les réponses
+              Valider mes réponses
             </button>
           ) : (
             <div className="flex gap-4">
               <button
                 onClick={() => navigate('/')}
-                className="flex-1 py-3 px-4 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors"
+                className={cn(
+                  "flex-1 py-4 rounded-2xl text-xl font-bold transition-all",
+                  "bg-white text-blue-600 border-2 border-blue-200",
+                  "hover:bg-blue-50 hover:border-blue-300",
+                  "transform hover:scale-[1.02] active:scale-[0.98]",
+                  "shadow-lg focus:ring-4 focus:ring-blue-500/30 focus:outline-none"
+                )}
               >
                 Retour à l'accueil
               </button>
               <button
                 onClick={resetGame}
-                className="flex-1 py-3 px-4 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                className={cn(
+                  "flex-1 py-4 rounded-2xl text-xl font-bold transition-all",
+                  "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
+                  "hover:from-blue-600 hover:to-purple-600",
+                  "transform hover:scale-[1.02] active:scale-[0.98]",
+                  "shadow-lg focus:ring-4 focus:ring-primary/30 focus:outline-none",
+                  "flex items-center justify-center gap-2"
+                )}
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className="w-5 h-5" />
                 Rejouer
               </button>
             </div>
           )}
         </div>
 
-        <div className="w-80 flex flex-col gap-4">
+        <div className="w-96 flex flex-col gap-6">
           {isGameOver && (
-            <div className="bg-white rounded-xl p-6 shadow-lg text-center">
-              <div className="text-5xl font-bold text-primary mb-2">
+            <div className="bg-white/80 rounded-3xl p-8 shadow-xl border-2 border-blue-200 text-center">
+              <div className="text-6xl font-bold text-blue-600 mb-4">
                 {score}/20
               </div>
-              <p className="text-gray-600 mb-4">
-                {score === 20 ? "Parfait ! 🎉" : 
-                 score >= 15 ? "Excellent ! 👏" :
-                 score >= 10 ? "Bien ! 👍" :
-                 "Continue à t'entraîner ! 💪"}
+              <p className="text-2xl text-blue-600 mb-6">
+                {score === 20 ? "🎉 Parfait ! Tu es un champion !" : 
+                 score >= 15 ? "👏 Excellent ! Continue comme ça !" :
+                 score >= 10 ? "👍 Bien joué ! Tu progresses !" :
+                 "💪 Ne t'inquiète pas, continue à t'entraîner !"}
               </p>
-              <div className="text-sm text-gray-500">
+              <div className="text-lg text-blue-500">
                 {multiplications.filter(m => parseInt(m.userAnswer) !== m.answer).length} erreurs
               </div>
             </div>

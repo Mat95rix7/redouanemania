@@ -33,16 +33,16 @@ const SCORING_SYSTEM = {
 };
 
 const Results = () => {
-  const { currentGameResults, resetGameResults } = useGameContext();
+  const { gameResults, resetGameResults } = useGameContext();
   const [animatedScore, setAnimatedScore] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const navigate = useNavigate();
 
   // Calculs des résultats
-  const correctAnswers = currentGameResults.filter(result => result.isCorrect).length;
-  const totalQuestions = currentGameResults.length;
+  const correctAnswers = gameResults.filter(result => result.isCorrect).length;
+  const totalQuestions = gameResults.length;
   const successRate = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
-  const totalTime = currentGameResults.reduce((sum, result) => sum + result.timeSpent, 0);
+  const totalTime = gameResults.reduce((sum, result) => sum + result.timeSpent, 0);
   const averageTime = totalQuestions > 0 ? totalTime / totalQuestions : 0;
 
   // Calcul du score avec points
@@ -52,7 +52,7 @@ const Results = () => {
     let maxStreak = 0;
     const scoreBreakdown = [];
 
-    currentGameResults.forEach((result, index) => {
+    gameResults.forEach((result, index) => {
       let questionScore = 0;
       
       if (result.isCorrect) {
@@ -122,7 +122,7 @@ const Results = () => {
   // Animation du score
   useEffect(() => {
     console.log('Results page loaded with', totalQuestions, 'questions');
-    console.log('Game results:', currentGameResults);
+    console.log('Game results:', gameResults);
     
     if (totalScore > 0) {
       const duration = 2000; // 2 secondes
@@ -142,7 +142,7 @@ const Results = () => {
       
       return () => clearInterval(timer);
     }
-  }, [totalScore, totalQuestions, currentGameResults]);
+  }, [totalScore, totalQuestions, gameResults]);
 
   // Déterminer le niveau de performance
   const getPerformanceLevel = () => {
@@ -248,60 +248,12 @@ const Results = () => {
             </h3>
             <div className="flex justify-between items-center">
               <span>Bonus série de {maxStreak} bonnes réponses</span>
-              <span className="font-semibold text-yellow-600">+{streakBonus} pts</span>
+              <span className="font-bold text-yellow-600">+{streakBonus} points</span>
             </div>
           </div>
         )}
 
-        {/* Détails des questions */}
-        <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
-          <button
-            onClick={() => setShowDetails(!showDetails)}
-            className="w-full flex items-center justify-between text-lg font-semibold mb-4"
-          >
-            <span>Détail des questions</span>
-            <span className={cn("transition-transform", showDetails && "rotate-180")}>
-              ▼
-            </span>
-          </button>
-          
-          {showDetails && (
-            <div className="space-y-3">
-              {scoreBreakdown.map((item) => (
-                <div
-                  key={item.question}
-                  className={cn(
-                    "p-4 rounded-lg border-l-4 flex justify-between items-center",
-                    item.isCorrect ? "bg-green-50 border-green-400" : "bg-red-50 border-red-400"
-                  )}
-                >
-                  <div className="flex-1">
-                    <div className="font-medium">
-                      Question {item.question}: {item.operation}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Votre réponse: {item.userAnswer} | 
-                      Bonne réponse: {item.correctAnswer} | 
-                      Temps: {item.timeSpent.toFixed(1)}s
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold">
-                      {item.totalPoints} pts
-                    </div>
-                    {item.speedBonus > 0 && (
-                      <div className="text-xs text-blue-600">
-                        +{item.speedBonus} vitesse
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Actions */}
+        {/* Boutons d'action */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
             onClick={() => {
@@ -309,20 +261,17 @@ const Results = () => {
               navigate('/game1/select-tables');
             }}
             className="flex items-center gap-2"
-            size="lg"
           >
             <RotateCcw className="h-5 w-5" />
-            Nouveau quiz
+            Nouveau Quiz
           </Button>
-          
           <Button
             onClick={() => navigate('/')}
             variant="outline"
             className="flex items-center gap-2"
-            size="lg"
           >
             <Home className="h-5 w-5" />
-            Accueil
+            Retour à l'accueil
           </Button>
         </div>
       </main>

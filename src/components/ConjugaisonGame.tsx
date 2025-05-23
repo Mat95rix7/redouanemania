@@ -105,10 +105,6 @@ const ConjugaisonGame: React.FC<ConjugationGameProps> = ({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-center">
-        Conjuguez le verbe "{verb}" au {temps}
-      </h2>
-      
       <div className="grid gap-4">
         {pronomsOrder.map((pronom) => (
           <div key={pronom} className="flex items-center gap-4">

@@ -56,7 +56,6 @@ const Quiz = () => {
   const [points, setPoints] = useState(0);
   const navigate = useNavigate();
 
-  // Generate a random multiplication question
   const generateQuestion = useCallback(() => {
     if (selectedTables.length === 0) {
       navigate('/game1/select-tables', { replace: true });
@@ -90,7 +89,14 @@ const Quiz = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [navigate, selectedTables, resetGameResults, generateQuestion]);
+  }, []);
+
+  // Gérer la génération des questions
+  useEffect(() => {
+    if (currentQuestion > 0) {
+      generateQuestion();
+    }
+  }, [currentQuestion, generateQuestion]);
 
   const handleAnswer = (userAnswer: number, timeSpent: number) => {
     const isCorrect = userAnswer === correctAnswer;
@@ -130,7 +136,6 @@ const Quiz = () => {
     // Passer à la question suivante immédiatement
     if (currentQuestion < TOTAL_QUESTIONS - 1) {
       setCurrentQuestion(prev => prev + 1);
-      generateQuestion();
     } else {
       // Quiz completed
       navigate('/game1/results', { replace: true });
