@@ -72,6 +72,7 @@ const Quiz = () => {
   const [points, setPoints] = useState(0);
   const [showResult, setShowResult] = useState<"correct" | "incorrect" | null>(null);
   const [currentStreak, setCurrentStreak] = useState(0);
+  const [maxStreak, setMaxStreak] = useState(0);
   const navigate = useNavigate();
 
   const generateQuestion = useCallback(() => {
@@ -100,18 +101,15 @@ const Quiz = () => {
     setTotalTime(0);
     setPoints(0);
     setCurrentQuestion(0);
+    setCurrentStreak(0);
+    setMaxStreak(0);
     generateQuestion();
-
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
-
-    return () => clearTimeout(timer);
+    setIsLoading(false);
   }, []);
 
   // Gérer la génération des questions
   useEffect(() => {
-    if (currentQuestion > 0) {
+    if (currentQuestion > 0 && currentQuestion < TOTAL_QUESTIONS) {
       generateQuestion();
     }
   }, [currentQuestion, generateQuestion]);
@@ -136,17 +134,7 @@ const Quiz = () => {
       // Mise à jour de la série
       const newStreak = currentStreak + 1;
       setCurrentStreak(newStreak);
-      
-      // Bonus de série
-      if (newStreak >= 10) {
-        questionPoints += SCORING_SYSTEM.STREAK_BONUS.STREAK_10;
-      } else if (newStreak >= 7) {
-        questionPoints += SCORING_SYSTEM.STREAK_BONUS.STREAK_7;
-      } else if (newStreak >= 5) {
-        questionPoints += SCORING_SYSTEM.STREAK_BONUS.STREAK_5;
-      } else if (newStreak >= 3) {
-        questionPoints += SCORING_SYSTEM.STREAK_BONUS.STREAK_3;
-      }
+      setMaxStreak(prev => Math.max(prev, newStreak));
       
       setCorrectCount(prev => prev + 1);
       setPoints(prev => prev + questionPoints);
@@ -174,10 +162,25 @@ const Quiz = () => {
       if (currentQuestion < TOTAL_QUESTIONS - 1) {
         setCurrentQuestion(prev => prev + 1);
       } else {
+        // Calculer le bonus de série final
+        let streakBonus = 0;
+        if (maxStreak >= 10) {
+          streakBonus = SCORING_SYSTEM.STREAK_BONUS.STREAK_10;
+        } else if (maxStreak >= 7) {
+          streakBonus = SCORING_SYSTEM.STREAK_BONUS.STREAK_7;
+        } else if (maxStreak >= 5) {
+          streakBonus = SCORING_SYSTEM.STREAK_BONUS.STREAK_5;
+        } else if (maxStreak >= 3) {
+          streakBonus = SCORING_SYSTEM.STREAK_BONUS.STREAK_3;
+        }
+        
+        // Ajouter le bonus de série aux points
+        setPoints(prev => prev + streakBonus);
+        
         // Quiz terminé, rediriger vers la page des résultats
         navigate('/game1/results', { replace: true });
       }
-    }, 1500);
+    }, 300);
   };
 
   const progress = ((currentQuestion + 1) / TOTAL_QUESTIONS) * 100;
