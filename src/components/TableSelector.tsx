@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { TableSelection } from '../context/GameContext';
+import { TableSelection } from '../context/GameContext.1tsx';
 import { cn } from '@/lib/utils';
 
 interface TableSelectorProps {

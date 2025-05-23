@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGameContext } from '../context/GameContext';
+import { useGameContext } from '../context/GameContext.tsx';
 import Header from '../components/Header';
 import ScoreTable from '../components/ScoreTable';
 import { CheckCircle, Clock, RefreshCw, ChevronLeft } from 'lucide-react';

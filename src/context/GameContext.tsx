@@ -1,14 +1,13 @@
-
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 export type TableSelection = number[];
-export type GameResult = {
+export interface GameResult {
   operation: string;
-  userAnswer: number | null;
+  userAnswer: number;
   correctAnswer: number;
   timeSpent: number; // in seconds
   isCorrect: boolean;
-};
+}
 
 interface GameContextType {
   username: string;
@@ -25,10 +24,32 @@ interface GameContextType {
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [username, setUsername] = useState<string>('');
-  const [selectedTables, setSelectedTables] = useState<TableSelection>([]);
+  // Initialiser les états avec les valeurs du localStorage
+  const [username, setUsername] = useState<string>(() => {
+    return localStorage.getItem('username') || '';
+  });
+  const [selectedTables, setSelectedTables] = useState<TableSelection>(() => {
+    const saved = localStorage.getItem('selectedTables');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [currentGameResults, setCurrentGameResults] = useState<GameResult[]>([]);
-  const [highScores, setHighScores] = useState<{ username: string; score: number; time: number }[]>([]);
+  const [highScores, setHighScores] = useState<{ username: string; score: number; time: number }[]>(() => {
+    const saved = localStorage.getItem('highScores');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Sauvegarder les changements dans le localStorage
+  useEffect(() => {
+    localStorage.setItem('username', username);
+  }, [username]);
+
+  useEffect(() => {
+    localStorage.setItem('selectedTables', JSON.stringify(selectedTables));
+  }, [selectedTables]);
+
+  useEffect(() => {
+    localStorage.setItem('highScores', JSON.stringify(highScores));
+  }, [highScores]);
 
   const addGameResult = (result: GameResult) => {
     setCurrentGameResults(prev => [...prev, result]);

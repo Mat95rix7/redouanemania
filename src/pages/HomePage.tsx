@@ -13,7 +13,12 @@ const games = [
     description: 'Testez votre vitesse avec 20 multiplications aléatoires en 2 minute !',
     path: '/game2'
   },
-  // Vous pouvez ajouter plus de jeux ici
+  {
+    id: 3,
+    title: 'Jeu de conjugaison',
+    description: 'Améliorez votre conjugaison avec des exercices interactifs et suivez votre progression',
+    path: '/game3'
+  }
 ];
 
 export default function HomePage() {
@@ -24,7 +29,7 @@ export default function HomePage() {
           Fast Math Arena
         </h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
           {games.map((game) => (
             <Link
               key={game.id}

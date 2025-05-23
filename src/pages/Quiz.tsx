@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGameContext } from '../context/GameContext';
+import { useGameContext } from '../context/GameContext.tsx';
 import Header from '../components/Header';
 import QuizCard from '../components/QuizCard';
 import { Progress } from '@/components/ui/progress';

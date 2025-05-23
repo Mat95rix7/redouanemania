@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGameContext } from '../context/GameContext';
+import { useGameContext } from '../context/GameContext.tsx';
 import Header from '../components/Header';
 import TableSelector from '../components/TableSelector';
 import { ChevronRight } from 'lucide-react';
@@ -25,7 +25,7 @@ const SelectTables = () => {
       setError('Veuillez sélectionner au moins une table');
       return;
     }
-    navigate('/quiz');
+    navigate('/game1/quiz');
   };
 
   return (
