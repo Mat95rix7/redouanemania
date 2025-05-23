@@ -1,147 +1,329 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGameContext } from '../context/GameContext.tsx';
+import { useGameContext } from '../context/GameContext';
 import Header from '../components/Header';
-import ScoreTable from '../components/ScoreTable';
-import { CheckCircle, Clock, RefreshCw, ChevronLeft, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { 
+  Trophy, 
+  Clock, 
+  Check, 
+  X, 
+  Star, 
+  Award,
+  RotateCcw,
+  Home
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Système de points
+const SCORING_SYSTEM = {
+  CORRECT_ANSWER: 100,
+  SPEED_BONUS: {
+    UNDER_3_SEC: 50,
+    UNDER_5_SEC: 30,
+    UNDER_8_SEC: 10
+  },
+  STREAK_BONUS: {
+    STREAK_3: 25,
+    STREAK_5: 50,
+    STREAK_7: 75,
+    STREAK_10: 100
+  }
+};
+
 const Results = () => {
-  const { 
-    username, 
-    currentGameResults, 
-    highScores, 
-    addHighScore, 
-    selectedTables,
-    resetGameResults 
-  } = useGameContext();
-  const [score, setScore] = useState(0);
-  const [totalPoints, setTotalPoints] = useState(0);
-  const [totalTime, setTotalTime] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const hasAddedScore = useRef(false);
+  const { currentGameResults, resetGameResults } = useGameContext();
+  const [animatedScore, setAnimatedScore] = useState(0);
+  const [showDetails, setShowDetails] = useState(false);
   const navigate = useNavigate();
 
+  // Calculs des résultats
+  const correctAnswers = currentGameResults.filter(result => result.isCorrect).length;
+  const totalQuestions = currentGameResults.length;
+  const successRate = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
+  const totalTime = currentGameResults.reduce((sum, result) => sum + result.timeSpent, 0);
+  const averageTime = totalQuestions > 0 ? totalTime / totalQuestions : 0;
+
+  // Calcul du score avec points
+  const calculateScore = () => {
+    let totalScore = 0;
+    let currentStreak = 0;
+    let maxStreak = 0;
+    const scoreBreakdown = [];
+
+    currentGameResults.forEach((result, index) => {
+      let questionScore = 0;
+      
+      if (result.isCorrect) {
+        // Points de base pour réponse correcte
+        questionScore += SCORING_SYSTEM.CORRECT_ANSWER;
+        
+        // Bonus de vitesse
+        let speedBonus = 0;
+        if (result.timeSpent < 3) {
+          speedBonus = SCORING_SYSTEM.SPEED_BONUS.UNDER_3_SEC;
+        } else if (result.timeSpent < 5) {
+          speedBonus = SCORING_SYSTEM.SPEED_BONUS.UNDER_5_SEC;
+        } else if (result.timeSpent < 8) {
+          speedBonus = SCORING_SYSTEM.SPEED_BONUS.UNDER_8_SEC;
+        }
+        questionScore += speedBonus;
+        
+        // Gestion des séries
+        currentStreak++;
+        maxStreak = Math.max(maxStreak, currentStreak);
+      } else {
+        currentStreak = 0;
+      }
+      
+      totalScore += questionScore;
+      scoreBreakdown.push({
+        question: index + 1,
+        operation: result.operation,
+        userAnswer: result.userAnswer,
+        correctAnswer: result.correctAnswer,
+        isCorrect: result.isCorrect,
+        timeSpent: result.timeSpent,
+        basePoints: result.isCorrect ? SCORING_SYSTEM.CORRECT_ANSWER : 0,
+        speedBonus: result.isCorrect ? (questionScore - SCORING_SYSTEM.CORRECT_ANSWER) : 0,
+        totalPoints: questionScore
+      });
+    });
+
+    // Bonus de série
+    let streakBonus = 0;
+    if (maxStreak >= 10) {
+      streakBonus = SCORING_SYSTEM.STREAK_BONUS.STREAK_10;
+    } else if (maxStreak >= 7) {
+      streakBonus = SCORING_SYSTEM.STREAK_BONUS.STREAK_7;
+    } else if (maxStreak >= 5) {
+      streakBonus = SCORING_SYSTEM.STREAK_BONUS.STREAK_5;
+    } else if (maxStreak >= 3) {
+      streakBonus = SCORING_SYSTEM.STREAK_BONUS.STREAK_3;
+    }
+    
+    totalScore += streakBonus;
+
+    return { totalScore, maxStreak, streakBonus, scoreBreakdown };
+  };
+
+  const { totalScore, maxStreak, streakBonus, scoreBreakdown } = calculateScore();
+
+  // Rediriger si pas de résultats
   useEffect(() => {
-    if (currentGameResults.length === 0) {
+    if (totalQuestions === 0) {
+      console.log('No results found, redirecting...');
       navigate('/game1/select-tables');
       return;
     }
+  }, [totalQuestions, navigate]);
 
-    // Calculate score, points and time
-    const correctAnswers = currentGameResults.filter(result => result.isCorrect).length;
-    const points = currentGameResults.reduce((total, result) => total + (result.points || 0), 0);
-    const time = currentGameResults.reduce((total, result) => total + result.timeSpent, 0);
+  // Animation du score
+  useEffect(() => {
+    console.log('Results page loaded with', totalQuestions, 'questions');
+    console.log('Game results:', currentGameResults);
     
-    setScore(correctAnswers);
-    setTotalPoints(points);
-    setTotalTime(time);
-    
-    // Add to high scores only once
-    if (!hasAddedScore.current) {
-      addHighScore(correctAnswers, time, points);
-      hasAddedScore.current = true;
+    if (totalScore > 0) {
+      const duration = 2000; // 2 secondes
+      const steps = 60;
+      const increment = totalScore / steps;
+      let current = 0;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= totalScore) {
+          setAnimatedScore(totalScore);
+          clearInterval(timer);
+        } else {
+          setAnimatedScore(Math.floor(current));
+        }
+      }, duration / steps);
+      
+      return () => clearInterval(timer);
     }
-    
-    // Animation delay
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, [currentGameResults, navigate, addHighScore]);
+  }, [totalScore, totalQuestions, currentGameResults]);
 
-  const handlePlayAgain = () => {
-    hasAddedScore.current = false;
-    resetGameResults();
-    navigate('/game1/quiz');
+  // Déterminer le niveau de performance
+  const getPerformanceLevel = () => {
+    if (successRate >= 90) return { level: 'Excellent', color: 'text-yellow-500', icon: Trophy };
+    if (successRate >= 75) return { level: 'Très bien', color: 'text-green-500', icon: Award };
+    if (successRate >= 60) return { level: 'Bien', color: 'text-blue-500', icon: Star };
+    if (successRate >= 40) return { level: 'Peut mieux faire', color: 'text-orange-500', icon: Star };
+    return { level: 'À retravailler', color: 'text-red-500', icon: Star };
   };
 
-  const handleNewGame = () => {
-    hasAddedScore.current = false;
-    resetGameResults();
-    navigate('/game1/select-tables');
-  };
+  const performance = getPerformanceLevel();
+  const PerformanceIcon = performance.icon;
 
-  const getScoreMessage = () => {
-    if (score === 10) return "Parfait !";
-    if (score >= 8) return "Excellent !";
-    if (score >= 6) return "Bien joué !";
-    if (score >= 4) return "Pas mal !";
-    return "Continuez à vous entraîner !";
-  };
-
-  const selectedTablesText = selectedTables
-    .sort((a, b) => a - b)
-    .join(', ');
+  if (totalQuestions === 0) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg mb-4">Aucun résultat trouvé</p>
+            <Button onClick={() => navigate('/game1/select-tables')}>
+              Commencer un quiz
+            </Button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
       
       <main className="flex-1 container max-w-4xl mx-auto px-6 py-8">
-        <div 
-          className={cn(
-            "max-w-2xl mx-auto transition-all duration-500",
-            isLoading ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
-          )}
-        >
-          <div className="glass-panel rounded-2xl p-8 mb-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2">{getScoreMessage()}</h1>
-              <p className="text-muted-foreground">
-                Tables: {selectedTablesText}
-              </p>
+        {/* Score principal */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <PerformanceIcon className={cn("h-8 w-8", performance.color)} />
+            <h1 className="text-3xl font-bold">Résultats du Quiz</h1>
+          </div>
+          
+          <div className="bg-white rounded-3xl p-8 shadow-lg mb-6">
+            <div className="text-6xl font-bold text-primary mb-2">
+              {animatedScore.toLocaleString()}
             </div>
-
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="text-center p-4 rounded-xl bg-white/50">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span className="font-medium">Score</span>
-                </div>
-                <div className="text-2xl font-bold">{score}/10</div>
-              </div>
-
-              <div className="text-center p-4 rounded-xl bg-white/50">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Star className="h-5 w-5 text-yellow-500" />
-                  <span className="font-medium">Points</span>
-                </div>
-                <div className="text-2xl font-bold">{totalPoints}</div>
-              </div>
-
-              <div className="text-center p-4 rounded-xl bg-white/50">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Clock className="h-5 w-5 text-blue-500" />
-                  <span className="font-medium">Temps</span>
-                </div>
-                <div className="text-2xl font-bold">{totalTime.toFixed(1)}s</div>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                onClick={handlePlayAgain}
-                className="flex-1 py-3 px-4 rounded-xl bg-primary text-white font-medium 
-                         hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Rejouer
-              </button>
-              
-              <button
-                onClick={handleNewGame}
-                className="flex-1 py-3 px-4 rounded-xl border border-primary text-primary 
-                         font-medium hover:bg-primary/10 transition-colors flex items-center justify-center gap-2"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Nouvelle partie
-              </button>
+            <div className="text-lg text-muted-foreground mb-4">points</div>
+            <div className={cn("text-2xl font-semibold", performance.color)}>
+              {performance.level}
             </div>
           </div>
+        </div>
 
-          <ScoreTable />
+        {/* Statistiques */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-xl p-4 text-center shadow-sm">
+            <div className="flex items-center justify-center mb-2">
+              <Check className="h-5 w-5 text-green-500 mr-1" />
+              <span className="text-2xl font-bold text-green-500">{correctAnswers}</span>
+            </div>
+            <div className="text-sm text-muted-foreground">Bonnes réponses</div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 text-center shadow-sm">
+            <div className="flex items-center justify-center mb-2">
+              <X className="h-5 w-5 text-red-500 mr-1" />
+              <span className="text-2xl font-bold text-red-500">{totalQuestions - correctAnswers}</span>
+            </div>
+            <div className="text-sm text-muted-foreground">Erreurs</div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 text-center shadow-sm">
+            <div className="flex items-center justify-center mb-2">
+              <Clock className="h-5 w-5 text-blue-500 mr-1" />
+              <span className="text-2xl font-bold text-blue-500">{averageTime.toFixed(1)}s</span>
+            </div>
+            <div className="text-sm text-muted-foreground">Temps moyen</div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 text-center shadow-sm">
+            <div className="flex items-center justify-center mb-2">
+              <Trophy className="h-5 w-5 text-orange-500 mr-1" />
+              <span className="text-2xl font-bold text-orange-500">{maxStreak}</span>
+            </div>
+            <div className="text-sm text-muted-foreground">Série max</div>
+          </div>
+        </div>
+
+        {/* Barre de progression */}
+        <div className="bg-white rounded-xl p-6 mb-8 shadow-sm">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium">Taux de réussite</span>
+            <span className="text-sm font-medium">{successRate.toFixed(0)}%</span>
+          </div>
+          <Progress value={successRate} className="h-3" />
+        </div>
+
+        {/* Bonus détaillés */}
+        {streakBonus > 0 && (
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 mb-8 border border-yellow-200">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500" />
+              Bonus obtenus
+            </h3>
+            <div className="flex justify-between items-center">
+              <span>Bonus série de {maxStreak} bonnes réponses</span>
+              <span className="font-semibold text-yellow-600">+{streakBonus} pts</span>
+            </div>
+          </div>
+        )}
+
+        {/* Détails des questions */}
+        <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="w-full flex items-center justify-between text-lg font-semibold mb-4"
+          >
+            <span>Détail des questions</span>
+            <span className={cn("transition-transform", showDetails && "rotate-180")}>
+              ▼
+            </span>
+          </button>
+          
+          {showDetails && (
+            <div className="space-y-3">
+              {scoreBreakdown.map((item) => (
+                <div
+                  key={item.question}
+                  className={cn(
+                    "p-4 rounded-lg border-l-4 flex justify-between items-center",
+                    item.isCorrect ? "bg-green-50 border-green-400" : "bg-red-50 border-red-400"
+                  )}
+                >
+                  <div className="flex-1">
+                    <div className="font-medium">
+                      Question {item.question}: {item.operation}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Votre réponse: {item.userAnswer} | 
+                      Bonne réponse: {item.correctAnswer} | 
+                      Temps: {item.timeSpent.toFixed(1)}s
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-semibold">
+                      {item.totalPoints} pts
+                    </div>
+                    {item.speedBonus > 0 && (
+                      <div className="text-xs text-blue-600">
+                        +{item.speedBonus} vitesse
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button
+            onClick={() => {
+              resetGameResults();
+              navigate('/game1/select-tables');
+            }}
+            className="flex items-center gap-2"
+            size="lg"
+          >
+            <RotateCcw className="h-5 w-5" />
+            Nouveau quiz
+          </Button>
+          
+          <Button
+            onClick={() => navigate('/')}
+            variant="outline"
+            className="flex items-center gap-2"
+            size="lg"
+          >
+            <Home className="h-5 w-5" />
+            Accueil
+          </Button>
         </div>
       </main>
     </div>
