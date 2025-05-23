@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fond avec dégradé -->
+  <rect width="32" height="32" rx="8" fill="url(#gradient)" />
+  
+  <!-- Symbole de calcul -->
+  <path d="M16 8C11.5817 8 8 11.5817 8 16C8 20.4183 11.5817 24 16 24C20.4183 24 24 20.4183 24 16C24 11.5817 20.4183 8 16 8ZM16 22C12.6863 22 10 19.3137 10 16C10 12.6863 12.6863 10 16 10C19.3137 10 22 12.6863 22 16C22 19.3137 19.3137 22 16 22Z" fill="white"/>
+  
+  <!-- Plus -->
+  <path d="M15 13H17V15H19V17H17V19H15V17H13V15H15V13Z" fill="white"/>
+  
+  <!-- Étoile décorative -->
+  <path d="M24 8L25.5 10.5L28 11L25.5 11.5L24 14L22.5 11.5L20 11L22.5 10.5L24 8Z" fill="#FFD700"/>
+  
+  <!-- Définitions des dégradés -->
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+</svg> 
