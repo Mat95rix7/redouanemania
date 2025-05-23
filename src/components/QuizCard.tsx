@@ -14,14 +14,28 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
   const [timeSpent, setTimeSpent] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const startTimeRef = useRef<number>(Date.now());
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Focus l'input quand le composant devient actif
+  // Nettoyer le timer lors du démontage du composant
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
+
+  // Focus l'input quand le composant devient actif ou quand l'opération change
   useEffect(() => {
     if (isActive && inputRef.current) {
-      // Petit délai pour s'assurer que le DOM est prêt
-      setTimeout(() => {
+      // Petit délai pour s'assurer que le DOM est prêt et que les animations sont terminées
+      const focusTimer = setTimeout(() => {
         inputRef.current?.focus();
+        // Sélectionner tout le texte pour faciliter la nouvelle saisie
+        inputRef.current?.select();
       }, 100);
+      
+      return () => clearTimeout(focusTimer);
     }
   }, [isActive, operation]);
 
@@ -31,33 +45,66 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
 
     setUserAnswer('');
     setStatus('idle');
+    setTimeSpent(0);
     startTimeRef.current = Date.now();
 
-    const timer = setInterval(() => {
+    // Nettoyer l'ancien timer s'il existe
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    // Créer un nouveau timer
+    timerRef.current = setInterval(() => {
       setTimeSpent((Date.now() - startTimeRef.current) / 1000);
     }, 100);
 
-    return () => clearInterval(timer);
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
   }, [operation, isActive]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userAnswer.trim() || !isActive || status !== 'idle') return;
+    
+    // Vérifications de sécurité
+    if (!isActive || status !== 'idle' || !userAnswer.trim()) {
+      return;
+    }
 
     const parsedAnswer = parseInt(userAnswer);
+    if (isNaN(parsedAnswer)) {
+      return;
+    }
+
     const isCorrect = parsedAnswer === correctAnswer;
     const finalTimeSpent = (Date.now() - startTimeRef.current) / 1000;
 
+    // Nettoyer le timer avant de changer l'état
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
     setStatus(isCorrect ? 'correct' : 'incorrect');
     setTimeSpent(finalTimeSpent);
-    onAnswer(parsedAnswer, finalTimeSpent);
+    
+    // Petit délai pour permettre l'animation avant d'appeler onAnswer
+    setTimeout(() => {
+      onAnswer(parsedAnswer, finalTimeSpent);
+    }, 300);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Permettre la soumission avec la touche Entrée
     if (e.key === 'Enter' && userAnswer.trim() && isActive && status === 'idle') {
       handleSubmit(e);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // N'autoriser que les chiffres
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setUserAnswer(value);
   };
 
   return (
@@ -92,9 +139,11 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
         <div className="flex flex-col gap-4">
           <input
             ref={inputRef}
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
+            onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             placeholder="Votre réponse"
             disabled={!isActive || status !== 'idle'}
