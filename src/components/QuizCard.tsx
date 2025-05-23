@@ -15,21 +15,30 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
   const inputRef = useRef<HTMLInputElement>(null);
   const startTimeRef = useRef<number>(Date.now());
 
-  // Timer uniquement quand operation change (évite les boucles)
+  // Focus l'input quand le composant devient actif
+  useEffect(() => {
+    if (isActive && inputRef.current) {
+      // Petit délai pour s'assurer que le DOM est prêt
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [isActive, operation]);
+
+  // Réinitialiser l'état quand l'opération change
   useEffect(() => {
     if (!isActive) return;
 
     setUserAnswer('');
     setStatus('idle');
     startTimeRef.current = Date.now();
-    if (inputRef.current) inputRef.current.focus();
 
     const timer = setInterval(() => {
       setTimeSpent((Date.now() - startTimeRef.current) / 1000);
     }, 100);
 
     return () => clearInterval(timer);
-  }, [operation]); // ← on observe uniquement l'opération
+  }, [operation, isActive]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +51,13 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
     setStatus(isCorrect ? 'correct' : 'incorrect');
     setTimeSpent(finalTimeSpent);
     onAnswer(parsedAnswer, finalTimeSpent);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Permettre la soumission avec la touche Entrée
+    if (e.key === 'Enter' && userAnswer.trim() && isActive && status === 'idle') {
+      handleSubmit(e);
+    }
   };
 
   return (
@@ -79,8 +95,10 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
             type="number"
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
+            onKeyPress={handleKeyPress}
             placeholder="Votre réponse"
             disabled={!isActive || status !== 'idle'}
+            autoFocus
             className={cn(
               "w-full p-4 text-xl text-center rounded-xl transition-all",
               "border bg-white/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:outline-none",

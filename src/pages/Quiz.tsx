@@ -142,22 +142,22 @@ const Quiz = () => {
       
       <main className="flex-1 container max-w-4xl mx-auto px-6 py-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm font-medium text-muted-foreground">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-lg font-medium text-muted-foreground">
               Question {currentQuestion + 1}/{TOTAL_QUESTIONS}
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span>{totalTime.toFixed(1)}s</span>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 text-lg bg-white/50 px-4 py-2 rounded-xl shadow-sm">
+                <Clock className="h-5 w-5 text-blue-500" />
+                <span className="font-medium">{totalTime.toFixed(1)}s</span>
               </div>
-              <div className="flex items-center gap-1 text-sm">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>{correctCount}</span>
+              <div className="flex items-center gap-2 text-lg bg-white/50 px-4 py-2 rounded-xl shadow-sm">
+                <Check className="h-5 w-5 text-green-500" />
+                <span className="font-medium">{correctCount}</span>
               </div>
-              <div className="flex items-center gap-1 text-sm">
-                <Star className="h-4 w-4 text-yellow-500" />
-                <span>{points}</span>
+              <div className="flex items-center gap-2 text-lg bg-white/50 px-4 py-2 rounded-xl shadow-sm">
+                <Star className="h-5 w-5 text-yellow-500" />
+                <span className="font-medium">{points}</span>
               </div>
             </div>
           </div>

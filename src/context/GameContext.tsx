@@ -33,29 +33,23 @@ interface GameContextType {
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Initialiser les états avec les valeurs du localStorage
+  // Initialiser les états
   const [username, setUsername] = useState<string>(() => {
     return localStorage.getItem('username') || '';
   });
-  const [selectedTables, setSelectedTables] = useState<TableSelection>(() => {
-    const saved = localStorage.getItem('selectedTables');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [selectedTables, setSelectedTables] = useState<TableSelection>([]);
   const [currentGameResults, setCurrentGameResults] = useState<GameResult[]>([]);
   const [highScores, setHighScores] = useState<HighScore[]>(() => {
     const saved = localStorage.getItem('highScores');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Sauvegarder les changements dans le localStorage
+  // Sauvegarder uniquement le nom d'utilisateur dans le localStorage
   useEffect(() => {
     localStorage.setItem('username', username);
   }, [username]);
 
-  useEffect(() => {
-    localStorage.setItem('selectedTables', JSON.stringify(selectedTables));
-  }, [selectedTables]);
-
+  // Sauvegarder les high scores
   useEffect(() => {
     localStorage.setItem('highScores', JSON.stringify(highScores));
   }, [highScores]);
