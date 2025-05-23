@@ -4,7 +4,7 @@ import { useGameContext } from '../context/GameContext.tsx';
 import Header from '../components/Header';
 import QuizCard from '../components/QuizCard';
 import { Progress } from '@/components/ui/progress';
-import { Clock, Check, X, Star } from 'lucide-react';
+import { Clock, Check, X, Star, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const TOTAL_QUESTIONS = 10;
@@ -39,11 +39,10 @@ const calculateComplexity = (num1: number, num2: number): number => {
 
 // Fonction pour calculer les points bonus de rapidité
 const calculateTimeBonus = (timeSpent: number): number => {
-  if (timeSpent <= 1) return MAX_TIME_BONUS;
-  if (timeSpent >= TIME_THRESHOLD) return 0;
-  
-  // Calcul linéaire du bonus entre 1 et TIME_THRESHOLD secondes
-  return MAX_TIME_BONUS * (1 - (timeSpent - 1) / (TIME_THRESHOLD - 1));
+  if (timeSpent <= TIME_THRESHOLD) {
+    return MAX_TIME_BONUS;
+  }
+  return Math.max(0, MAX_TIME_BONUS * (1 - (timeSpent - TIME_THRESHOLD) / TIME_THRESHOLD));
 };
 
 const Quiz = () => {
@@ -59,7 +58,10 @@ const Quiz = () => {
 
   // Generate a random multiplication question
   const generateQuestion = useCallback(() => {
-    if (selectedTables.length === 0) return;
+    if (selectedTables.length === 0) {
+      navigate('/game1/select-tables', { replace: true });
+      return;
+    }
     
     const randomTableIndex = Math.floor(Math.random() * selectedTables.length);
     const table = selectedTables[randomTableIndex];
@@ -67,18 +69,19 @@ const Quiz = () => {
     const op = `${table} × ${number}`;
     setOperation(op);
     setCorrectAnswer(table * number);
-  }, [selectedTables]);
+  }, [selectedTables, navigate]);
 
   // Initialize the quiz
   useEffect(() => {
     if (selectedTables.length === 0) {
-      navigate('/game1/select-tables');
+      navigate('/game1/select-tables', { replace: true });
       return;
     }
 
     resetGameResults();
     setCorrectCount(0);
     setTotalTime(0);
+    setPoints(0);
     setCurrentQuestion(0);
     generateQuestion();
 
@@ -130,39 +133,41 @@ const Quiz = () => {
       generateQuestion();
     } else {
       // Quiz completed
-      navigate('/game1/results');
+      navigate('/game1/results', { replace: true });
     }
   };
 
   const progress = ((currentQuestion + 1) / TOTAL_QUESTIONS) * 100;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
       <Header />
       
       <main className="flex-1 container max-w-4xl mx-auto px-6 py-8">
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
-            <div className="text-lg font-medium text-muted-foreground">
+            <div className="text-2xl font-bold text-blue-600 bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
               Question {currentQuestion + 1}/{TOTAL_QUESTIONS}
             </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 text-lg bg-white/50 px-4 py-2 rounded-xl shadow-sm">
-                <Star className="h-5 w-5 text-yellow-500" />
-                <span className="font-medium">{points}</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-xl bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
+                <Trophy className="h-6 w-6 text-yellow-500" />
+                <span className="font-bold">{points}</span>
               </div>
-              <div className="flex items-center gap-2 text-lg bg-white/50 px-4 py-2 rounded-xl shadow-sm">
-                <Clock className="h-5 w-5 text-blue-500" />
-                <span className="font-medium">{totalTime.toFixed(1)}s</span>
+              <div className="flex items-center gap-2 text-xl bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
+                <Clock className="h-6 w-6 text-blue-500" />
+                <span className="font-bold">{totalTime.toFixed(1)}s</span>
               </div>
-              <div className="flex items-center gap-2 text-lg bg-white/50 px-4 py-2 rounded-xl shadow-sm">
-                <Check className="h-5 w-5 text-green-500" />
-                <span className="font-medium">{correctCount}</span>
+              <div className="flex items-center gap-2 text-xl bg-white/80 px-6 py-3 rounded-2xl shadow-lg">
+                <Check className="h-6 w-6 text-green-500" />
+                <span className="font-bold">{correctCount}</span>
               </div>
-
             </div>
           </div>
-          <Progress value={progress} className="h-2 bg-secondary" />
+          <Progress 
+            value={progress} 
+            className="h-4 bg-white/50 rounded-full overflow-hidden"
+          />
         </div>
         
         <div 

@@ -1,46 +1,49 @@
-
 import React from 'react';
-import { TableSelection } from '../context/GameContext.1tsx';
 import { cn } from '@/lib/utils';
 
 interface TableSelectorProps {
-  selectedTables: TableSelection;
+  selectedTables: number[];
   onSelectTable: (table: number) => void;
 }
 
 const TableSelector: React.FC<TableSelectorProps> = ({ selectedTables, onSelectTable }) => {
-  const tables = Array.from({ length: 10 }, (_, i) => i + 1);
-
   return (
-    <div className="w-full animate-scale-in">
-      <h2 className="text-lg font-medium mb-4 text-center">Choisissez les tables</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        {tables.map((table) => (
-          <button
-            key={table}
-            onClick={() => onSelectTable(table)}
-            className={cn(
-              "relative overflow-hidden h-20 rounded-xl font-display font-medium text-xl transition-all duration-300",
-              "hover:shadow-md hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50",
-              selectedTables.includes(table)
-                ? "bg-primary text-white shadow-lg"
-                : "bg-white text-foreground border border-border/50"
-            )}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5"></div>
-            <span>{table}</span>
-          </button>
-        ))}
-      </div>
-      <div className="mt-8 text-center text-sm text-muted-foreground">
-        {selectedTables.length === 0 ? (
-          <p>Sélectionnez au moins une table</p>
-        ) : (
-          <p>
-            Tables sélectionnées: {selectedTables.sort((a, b) => a - b).join(', ')}
-          </p>
-        )}
-      </div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((table) => (
+        <button
+          key={table}
+          onClick={() => onSelectTable(table)}
+          className={cn(
+            "relative p-6 rounded-2xl transition-all duration-300",
+            "transform hover:scale-105 active:scale-95",
+            "border-2 shadow-lg",
+            selectedTables.includes(table)
+              ? "bg-gradient-to-br from-blue-500 to-purple-500 text-white border-blue-400"
+              : "bg-white/50 border-blue-200 hover:border-blue-300"
+          )}
+        >
+          <div className="text-3xl font-bold">
+             {table}
+          </div>
+          {selectedTables.includes(table) && (
+            <div className="absolute -top-2 -right-2 bg-yellow-400 text-white rounded-full p-1">
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+          )}
+        </button>
+      ))}
     </div>
   );
 };

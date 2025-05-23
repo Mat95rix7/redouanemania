@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type TableSelection = number[];
 export interface GameResult {
@@ -23,7 +23,7 @@ interface GameContextType {
   setUsername: (name: string) => void;
   selectedTables: TableSelection;
   setSelectedTables: (tables: TableSelection) => void;
-  currentGameResults: GameResult[];
+  gameResults: GameResult[];
   addGameResult: (result: GameResult) => void;
   resetGameResults: () => void;
   highScores: HighScore[];
@@ -32,21 +32,28 @@ interface GameContextType {
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Initialiser les états
+export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [username, setUsername] = useState<string>(() => {
-    return localStorage.getItem('username') || '';
+    const savedUsername = localStorage.getItem('username');
+    return savedUsername || '';
   });
+
+  // Ne plus sauvegarder les tables dans le localStorage
   const [selectedTables, setSelectedTables] = useState<TableSelection>([]);
-  const [currentGameResults, setCurrentGameResults] = useState<GameResult[]>([]);
+
+  const [gameResults, setGameResults] = useState<GameResult[]>([]);
   const [highScores, setHighScores] = useState<HighScore[]>(() => {
     const saved = localStorage.getItem('highScores');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Sauvegarder uniquement le nom d'utilisateur dans le localStorage
+  // Sauvegarder le nom d'utilisateur dans localStorage
   useEffect(() => {
-    localStorage.setItem('username', username);
+    if (username) {
+      localStorage.setItem('username', username);
+    } else {
+      localStorage.removeItem('username');
+    }
   }, [username]);
 
   // Sauvegarder les high scores
@@ -55,12 +62,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [highScores]);
 
   const addGameResult = (result: GameResult) => {
-    setCurrentGameResults(prev => [...prev, result]);
+    setGameResults(prev => [...prev, result]);
   };
 
-  const resetGameResults = useCallback(() => {
-    setCurrentGameResults([]);
-  }, []);
+  const resetGameResults = () => {
+    setGameResults([]);
+  };
 
   const addHighScore = (score: number, time: number, points: number) => {
     const newHighScore: HighScore = {
@@ -84,30 +91,30 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const value = {
+    username,
+    setUsername,
+    selectedTables,
+    setSelectedTables,
+    gameResults,
+    addGameResult,
+    resetGameResults,
+    highScores,
+    addHighScore
+  };
+
   return (
-    <GameContext.Provider value={{
-      username,
-      setUsername,
-      selectedTables,
-      setSelectedTables,
-      currentGameResults,
-      addGameResult,
-      resetGameResults,
-      highScores,
-      addHighScore
-    }}>
+    <GameContext.Provider value={value}>
       {children}
     </GameContext.Provider>
   );
 };
 
-const useGameContext = (): GameContextType => {
+export const useGameContext = () => {
   const context = useContext(GameContext);
   if (context === undefined) {
     throw new Error('useGameContext must be used within a GameProvider');
   }
   return context;
 };
-
-export { useGameContext };
 

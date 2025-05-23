@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { Sparkles } from 'lucide-react';
 
 interface QuizCardProps {
   operation: string;
@@ -28,10 +29,8 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
   // Focus l'input quand le composant devient actif ou quand l'opération change
   useEffect(() => {
     if (isActive && inputRef.current) {
-      // Petit délai pour s'assurer que le DOM est prêt et que les animations sont terminées
       const focusTimer = setTimeout(() => {
         inputRef.current?.focus();
-        // Sélectionner tout le texte pour faciliter la nouvelle saisie
         inputRef.current?.select();
       }, 100);
       
@@ -48,12 +47,10 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
     setTimeSpent(0);
     startTimeRef.current = Date.now();
 
-    // Nettoyer l'ancien timer s'il existe
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
 
-    // Créer un nouveau timer
     timerRef.current = setInterval(() => {
       setTimeSpent((Date.now() - startTimeRef.current) / 1000);
     }, 100);
@@ -68,7 +65,6 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Vérifications de sécurité
     if (!isActive || status !== 'idle' || !userAnswer.trim()) {
       return;
     }
@@ -81,7 +77,6 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
     const isCorrect = parsedAnswer === correctAnswer;
     const finalTimeSpent = (Date.now() - startTimeRef.current) / 1000;
 
-    // Nettoyer le timer avant de changer l'état
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
@@ -89,7 +84,6 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
     setStatus(isCorrect ? 'correct' : 'incorrect');
     setTimeSpent(finalTimeSpent);
     
-    // Petit délai pour permettre l'animation avant d'appeler onAnswer
     setTimeout(() => {
       onAnswer(parsedAnswer, finalTimeSpent);
     }, 300);
@@ -102,7 +96,6 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // N'autoriser que les chiffres
     const value = e.target.value.replace(/[^0-9]/g, '');
     setUserAnswer(value);
   };
@@ -110,20 +103,21 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
   return (
     <div
       className={cn(
-        "p-6 rounded-2xl w-full max-w-md transition-all duration-300 transform",
-        "border shadow-sm glass-panel",
+        "p-8 rounded-3xl w-full max-w-md transition-all duration-500 transform",
+        "border-4 shadow-xl glass-panel",
         isActive ? "scale-100 opacity-100" : "scale-95 opacity-50",
-        status === 'correct' ? "border-green-400" :
-        status === 'incorrect' ? "border-red-400" : ""
+        status === 'correct' ? "border-green-400 bg-green-50" :
+        status === 'incorrect' ? "border-red-400 bg-red-50" :
+        "border-blue-400 bg-blue-50"
       )}
     >
-      <div className="flex justify-between items-center mb-4">
-        <div className="text-sm font-medium text-muted-foreground">
-          Temps: {timeSpent.toFixed(1)}s
+      <div className="flex justify-between items-center mb-6">
+        <div className="text-lg font-bold text-blue-600 bg-white/80 px-4 py-2 rounded-xl shadow-sm">
+          ⏱️ {timeSpent.toFixed(1)}s
         </div>
         <div
           className={cn(
-            "h-3 w-3 rounded-full",
+            "h-4 w-4 rounded-full transition-all duration-300",
             status === 'idle' ? "bg-blue-400 animate-pulse-subtle" :
             status === 'correct' ? "bg-green-400" :
             "bg-red-400"
@@ -131,11 +125,18 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
         />
       </div>
 
-      <div className="text-3xl font-display font-semibold text-center py-8">
-        {operation} = ?
+      <div className="relative">
+        <div className="text-4xl font-display font-bold text-center py-8 bg-white/80 rounded-2xl shadow-sm">
+          {operation} = ?
+        </div>
+        {status === 'correct' && (
+          <div className="absolute -top-4 -right-4 animate-bounce">
+            <Sparkles className="h-8 w-8 text-yellow-400" />
+          </div>
+        )}
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-4">
+      <form onSubmit={handleSubmit} className="mt-6">
         <div className="flex flex-col gap-4">
           <input
             ref={inputRef}
@@ -145,12 +146,14 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
             value={userAnswer}
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
-            placeholder="Votre réponse"
+            placeholder="Ta réponse ici !"
             disabled={!isActive || status !== 'idle'}
             autoFocus
             className={cn(
-              "w-full p-4 text-xl text-center rounded-xl transition-all",
-              "border bg-white/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:outline-none",
+              "w-full p-5 text-2xl text-center rounded-2xl transition-all",
+              "border-2 bg-white/80 backdrop-blur-sm",
+              "focus:ring-4 focus:ring-primary/50 focus:outline-none",
+              "hover:scale-[1.02] active:scale-[0.98]",
               (!isActive || status !== 'idle') && "opacity-50 cursor-not-allowed"
             )}
           />
@@ -159,12 +162,17 @@ const QuizCard: React.FC<QuizCardProps> = ({ operation, correctAnswer, onAnswer,
             type="submit"
             disabled={!isActive || !userAnswer.trim() || status !== 'idle'}
             className={cn(
-              "w-full p-4 rounded-xl transition-all font-medium",
-              "bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none",
+              "w-full p-5 rounded-2xl transition-all font-bold text-xl",
+              "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
+              "hover:from-blue-600 hover:to-purple-600",
+              "transform hover:scale-[1.02] active:scale-[0.98]",
+              "shadow-lg focus:ring-4 focus:ring-primary/50 focus:outline-none",
               (!isActive || !userAnswer.trim() || status !== 'idle') && "opacity-50 cursor-not-allowed"
             )}
           >
-            Valider
+            {status === 'idle' ? '🎯 Valider' : 
+             status === 'correct' ? '✨ Bravo !' : 
+             '❌ Essaie encore !'}
           </button>
         </div>
       </form>
