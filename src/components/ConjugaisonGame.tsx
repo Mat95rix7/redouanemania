@@ -18,6 +18,7 @@ const ConjugaisonGame: React.FC<ConjugationGameProps> = ({
 }) => {
   const [userAnswers, setUserAnswers] = useState<Partial<ConjugaisonParTemps>>({});
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [validatedAnswers, setValidatedAnswers] = useState<Record<Pronom, boolean>>({} as Record<Pronom, boolean>);
 
   // Définir l'ordre des pronoms
   const pronomsOrder: Pronom[] = ["je", "tu", "il/elle", "nous", "vous", "ils/elles"];
@@ -50,9 +51,10 @@ const ConjugaisonGame: React.FC<ConjugationGameProps> = ({
   const checkAnswers = () => {
     let allCorrect = true;
     const incorrectAnswers: string[] = [];
+    const newValidatedAnswers: Record<Pronom, boolean> = {} as Record<Pronom, boolean>;
 
-    console.log('Données de conjugaison reçues:', conjugationData);
-    console.log('Réponses utilisateur:', userAnswers);
+    // console.log('Données de conjugaison reçues:', conjugationData);
+    // console.log('Réponses utilisateur:', userAnswers);
 
     pronomsOrder.forEach((pronom) => {
       let correctAnswer = '';
@@ -69,6 +71,8 @@ const ConjugaisonGame: React.FC<ConjugationGameProps> = ({
       }
 
       const userAnswer = normalizeAnswer(userAnswers[pronom] || '');
+      const isCorrect = userAnswer === correctAnswer;
+      newValidatedAnswers[pronom] = isCorrect;
 
       console.log(`Vérification pour ${pronom}:`, {
         correctAnswer,
@@ -76,11 +80,13 @@ const ConjugaisonGame: React.FC<ConjugationGameProps> = ({
         match: correctAnswer === userAnswer
       });
 
-      if (userAnswer !== correctAnswer) {
+      if (!isCorrect) {
         allCorrect = false;
         incorrectAnswers.push(`${pronom}: ${userAnswer} (correct: ${correctAnswer})`);
       }
     });
+
+    setValidatedAnswers(newValidatedAnswers);
 
     if (allCorrect) {
       setMessage({ text: 'Bravo ! Toutes les réponses sont correctes !', type: 'success' });
@@ -100,6 +106,7 @@ const ConjugaisonGame: React.FC<ConjugationGameProps> = ({
     });
     setUserAnswers(initialAnswers);
     setMessage(null);
+    setValidatedAnswers({} as Record<Pronom, boolean>);
     if (onReset) onReset();
   };
 
@@ -108,12 +115,16 @@ const ConjugaisonGame: React.FC<ConjugationGameProps> = ({
       <div className="grid gap-4">
         {pronomsOrder.map((pronom) => (
           <div key={pronom} className="flex items-center gap-4">
-            <label className="w-24 font-medium">{pronom}</label>
+            <label className="w-1/6 font-medium">{pronom}</label>
             <input
               type="text"
               value={userAnswers[pronom] || ''}
               onChange={(e) => handleInputChange(pronom, e.target.value)}
-              className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={cn(
+                "flex-1 w-5/6 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500",
+                Object.keys(validatedAnswers).length > 0 && validatedAnswers[pronom] === true && "bg-green-50 border-green-500",
+                Object.keys(validatedAnswers).length > 0 && validatedAnswers[pronom] === false && "bg-red-50 border-red-500"
+              )}
               placeholder="Entrez la conjugaison"
             />
           </div>

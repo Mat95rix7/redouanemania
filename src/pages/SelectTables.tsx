@@ -48,7 +48,7 @@ const SelectTables = () => {
             </div>
           </div>
           <p className="text-xl text-blue-600">
-            Choisis les tables de multiplication que tu veux réviser !
+            Choisissez les tables de multiplication que vous voulez réviser !
           </p>
         </div>
         
