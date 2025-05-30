@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, Calculator, Timer, BookOpen } from 'lucide-react';
+import { Sparkles, Calculator, Timer, BookOpen, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const games = [
@@ -26,6 +26,14 @@ const games = [
     path: '/game3',
     icon: BookOpen,
     color: 'from-pink-500 to-yellow-500'
+  },
+  {
+    id: 4,
+    title: 'English Conjugation',
+    description: 'Practice English verb conjugation with interactive exercises and track your progress',
+    path: '/game4',
+    icon: Globe,
+    color: 'from-yellow-500 to-green-500'
   }
 ];
 
