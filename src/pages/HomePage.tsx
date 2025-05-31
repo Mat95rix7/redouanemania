@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, Calculator, Timer, BookOpen, Globe } from 'lucide-react';
+import { Sparkles, Calculator, Timer, BookOpen, Globe, Grid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const games = [
@@ -34,6 +34,14 @@ const games = [
     path: '/game4',
     icon: Globe,
     color: 'from-yellow-500 to-green-500'
+  },
+  {
+    id: 5,
+    title: 'Grille de Multiplication',
+    description: 'Trouvez les résultats de la table de multiplication dans une grille de nombres !',
+    path: '/game5',
+    icon: Grid,
+    color: 'from-green-500 to-blue-500'
   }
 ];
 

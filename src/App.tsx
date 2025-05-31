@@ -13,6 +13,7 @@ import Game2 from "./pages/Game2";
 import NotFound from "./pages/NotFound";
 import Game3 from "./pages/Game3";
 import Game4 from "./pages/Game4";
+import Game5 from "./pages/Game5";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/game2" element={<Game2 />} />
             <Route path="/game3" element={<Game3 />} />
             <Route path="/game4" element={<Game4 />} />
+            <Route path="/game5" element={<Game5 />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
