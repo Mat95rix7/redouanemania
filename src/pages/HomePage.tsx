@@ -47,47 +47,47 @@ const games = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12 relative">
-          <h1 className="text-5xl font-display font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+        <div className="text-center mb-8 sm:mb-12 relative">
+          <h1 className="text-3xl sm:text-5xl font-display font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-4">
             RedouaneMania
           </h1>
-          <p className="text-xl text-blue-600 mb-6">
+          <p className="text-base sm:text-xl text-blue-600 mb-4 sm:mb-6">
             Bienvenue dans votre espace de jeux et de révision !
           </p>
-          <div className="absolute -top-4 -right-4 animate-bounce">
-            <Sparkles className="h-8 w-8 text-yellow-400" />
+          <div className="absolute -top-2 sm:-top-4 -right-2 sm:-right-4 animate-bounce">
+            <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400" />
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {games.map((game) => (
             <Link
               key={game.id}
               to={game.path}
               className={cn(
-                "group relative overflow-hidden rounded-3xl p-8 transition-all duration-300",
+                "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-8 transition-all duration-300",
                 "bg-gradient-to-br", game.color,
                 "transform hover:scale-[1.02] active:scale-[0.98]",
-                "shadow-xl hover:shadow-2xl"
+                "shadow-lg hover:shadow-xl"
               )}
             >
               <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
               <div className="relative z-10">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-white/20 rounded-2xl">
-                    <game.icon className="h-8 w-8 text-white" />
+                <div className="flex items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+                  <div className="p-2 sm:p-3 bg-white/20 rounded-xl sm:rounded-2xl">
+                    <game.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white">
+                  <h2 className="text-lg sm:text-2xl font-bold text-white">
                     {game.title}
                   </h2>
                 </div>
-                <p className="text-white/90 text-lg">
+                <p className="text-white/90 text-sm sm:text-lg">
                   {game.description}
                 </p>
-                <div className="mt-6 flex justify-end">
-                  <div className="px-6 py-3 bg-white/20 rounded-xl text-white font-bold text-lg group-hover:bg-white/30 transition-colors">
+                <div className="mt-4 sm:mt-6 flex justify-end">
+                  <div className="px-4 sm:px-6 py-2 sm:py-3 bg-white/20 rounded-lg sm:rounded-xl text-white font-bold text-base sm:text-lg group-hover:bg-white/30 transition-colors">
                     Jouer →
                   </div>
                 </div>
