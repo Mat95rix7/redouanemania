@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Clock, Trophy, CheckCircle, XCircle } from 'lucide-react';
 import { useGameContext } from '../context/GameContext.tsx';
 import { cn } from '@/lib/utils';
+import RequireAuth from '../components/RequireAuth';
+import HeaderJeu from '../components/HeaderJeu';
 
 interface Multiplication {
   num1: number;
@@ -159,146 +161,145 @@ const Game2 = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
-      <button
-        onClick={() => navigate('/')}
-        className="absolute top-4 left-4 flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors bg-white/80 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow-sm text-sm sm:text-base"
-      >
-        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-        Retour
-      </button>
-
-      <div className="max-w-6xl w-full flex flex-col lg:flex-row gap-4 sm:gap-6">
-        <div className="flex-1 bg-white/80 rounded-3xl p-4 sm:p-8 shadow-xl border-2 border-blue-200">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-blue-600 text-center sm:text-left">
-              Multiplication Rapide
-            </h2>
-            <div className="flex items-center gap-2 text-lg sm:text-xl font-bold text-blue-600 bg-white/80 px-4 sm:px-6 py-2 sm:py-3 rounded-2xl shadow-lg">
-              <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
-              {formatTime(timeLeft)}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-            {multiplications.map((m, index) => (
-              <div 
-                key={index} 
-                className={cn(
-                  "p-4 sm:p-6 rounded-2xl transition-all duration-300",
-                  "border-2 shadow-lg",
-                  isGameOver 
-                    ? parseInt(m.userAnswer) === m.answer
-                      ? "bg-green-50 border-green-200"
-                      : "bg-red-50 border-red-200"
-                    : "bg-white/50 border-blue-200 hover:border-blue-300"
-                )}
-              >
-                <div className="flex flex-col items-center gap-2 sm:gap-3">
-                  <div className="text-2xl sm:text-3xl font-bold text-blue-600">
-                    {m.num1} × {m.num2}
+    <RequireAuth>
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
+        <main className="flex-1 container max-w-4xl mx-auto px-6 py-8">
+          <HeaderJeu />
+          <div className="mt-8">
+            <div className="max-w-6xl w-full flex flex-col lg:flex-row gap-4 sm:gap-6">
+              <div className="flex-1 bg-white/80 rounded-3xl p-4 sm:p-8 shadow-xl border-2 border-blue-200">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 sm:mb-8">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-blue-600 text-center sm:text-left">
+                    Multiplication Rapide
+                  </h2>
+                  <div className="flex items-center gap-2 text-lg sm:text-xl font-bold text-blue-600 bg-white/80 px-4 sm:px-6 py-2 sm:py-3 rounded-2xl shadow-lg">
+                    <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
+                    {formatTime(timeLeft)}
                   </div>
-                  {!isGameOver ? (
-                    <input
-                      type="number"
-                      value={m.userAnswer}
-                      onChange={(e) => handleAnswerChange(index, e.target.value)}
-                      className="w-24 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 rounded-xl border-2 text-center text-xl sm:text-2xl font-bold focus:ring-4 focus:ring-blue-500/50 focus:outline-none bg-white/80"
-                      placeholder="?"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center gap-1 sm:gap-2">
-                      <div className="text-xl sm:text-2xl font-bold">
-                        {parseInt(m.userAnswer) === m.answer ? (
-                          <div className="flex items-center gap-1 sm:gap-2 text-green-600">
-                            <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />
-                            {m.answer}
-                          </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+                  {multiplications.map((m, index) => (
+                    <div 
+                      key={index} 
+                      className={cn(
+                        "p-4 sm:p-6 rounded-2xl transition-all duration-300",
+                        "border-2 shadow-lg",
+                        isGameOver 
+                          ? parseInt(m.userAnswer) === m.answer
+                            ? "bg-green-50 border-green-200"
+                            : "bg-red-50 border-red-200"
+                          : "bg-white/50 border-blue-200 hover:border-blue-300"
+                      )}
+                    >
+                      <div className="flex flex-col items-center gap-2 sm:gap-3">
+                        <div className="text-2xl sm:text-3xl font-bold text-blue-600">
+                          {m.num1} × {m.num2}
+                        </div>
+                        {!isGameOver ? (
+                          <input
+                            type="number"
+                            value={m.userAnswer}
+                            onChange={(e) => handleAnswerChange(index, e.target.value)}
+                            className="w-24 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 rounded-xl border-2 text-center text-xl sm:text-2xl font-bold focus:ring-4 focus:ring-blue-500/50 focus:outline-none bg-white/80"
+                            placeholder="?"
+                          />
                         ) : (
-                          <div className="flex items-center gap-1 sm:gap-2 text-red-600">
-                            <XCircle className="h-5 w-5 sm:h-6 sm:w-6" />
-                            {m.answer}
+                          <div className="flex flex-col items-center gap-1 sm:gap-2">
+                            <div className="text-xl sm:text-2xl font-bold">
+                              {parseInt(m.userAnswer) === m.answer ? (
+                                <div className="flex items-center gap-1 sm:gap-2 text-green-600">
+                                  <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />
+                                  {m.answer}
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1 sm:gap-2 text-red-600">
+                                  <XCircle className="h-5 w-5 sm:h-6 sm:w-6" />
+                                  {m.answer}
+                                </div>
+                              )}
+                            </div>
+                            {parseInt(m.userAnswer) !== m.answer && (
+                              <div className="text-sm sm:text-lg text-red-500">
+                                Ta réponse: {m.userAnswer || 'Non répondu'}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
-                      {parseInt(m.userAnswer) !== m.answer && (
-                        <div className="text-sm sm:text-lg text-red-500">
-                          Ta réponse: {m.userAnswer || 'Non répondu'}
-                        </div>
-                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
+
+                {!isGameOver ? (
+                  <button
+                    onClick={handleSubmit}
+                    className={cn(
+                      "w-full py-3 sm:py-4 rounded-2xl text-lg sm:text-xl font-bold transition-all",
+                      "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
+                      "hover:from-blue-600 hover:to-purple-600",
+                      "transform hover:scale-[1.02] active:scale-[0.98]",
+                      "shadow-lg focus:ring-4 focus:ring-primary/30 focus:outline-none"
+                    )}
+                  >
+                    Valider mes réponses
+                  </button>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <button
+                      onClick={resetGame}
+                      className={cn(
+                        "w-full py-3 sm:py-4 rounded-2xl text-lg sm:text-xl font-bold transition-all",
+                        "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
+                        "hover:from-blue-600 hover:to-purple-600",
+                        "transform hover:scale-[1.02] active:scale-[0.98]",
+                        "shadow-lg focus:ring-4 focus:ring-primary/30 focus:outline-none",
+                        "flex items-center justify-center gap-2"
+                      )}
+                    >
+                      <RefreshCw className="h-5 w-5 sm:h-6 sm:w-6" />
+                      Nouvelle partie
+                    </button>
+                    <button
+                      onClick={() => navigate('/')}
+                      className={cn(
+                        "w-full py-3 sm:py-4 rounded-2xl text-lg sm:text-xl font-bold transition-all",
+                        "bg-white text-blue-600 border-2 border-blue-200",
+                        "hover:bg-blue-50",
+                        "transform hover:scale-[1.02] active:scale-[0.98]",
+                        "shadow-lg focus:ring-4 focus:ring-primary/30 focus:outline-none"
+                      )}
+                    >
+                      Retour à l'accueil
+                    </button>
+                  </div>
+                )}
               </div>
-            ))}
+
+              <div className="w-full lg:w-96 flex flex-col gap-6 order-first lg:order-last">
+                {isGameOver && (
+                  <div className="bg-white/80 rounded-3xl p-8 shadow-xl border-2 border-blue-200 text-center">
+                    <div className="text-6xl font-bold text-blue-600 mb-4">
+                      {score}/20
+                    </div>
+                    <p className="text-2xl text-blue-600 mb-6">
+                      {score === 20 ? "🎉 Parfait ! Tu es un champion !" : 
+                       score >= 15 ? "👏 Excellent ! Continue comme ça !" :
+                       score >= 10 ? "👍 Bien joué ! Tu progresses !" :
+                       "💪 Ne t'inquiète pas, continue à t'entraîner !"}
+                    </p>
+                    <div className="text-lg text-blue-500">
+                      {multiplications.filter(m => parseInt(m.userAnswer) !== m.answer).length} erreurs
+                    </div>
+                  </div>
+                )}
+                <ScoreTable />
+              </div>
+            </div>
           </div>
-
-          {!isGameOver ? (
-            <button
-              onClick={handleSubmit}
-              className={cn(
-                "w-full py-3 sm:py-4 rounded-2xl text-lg sm:text-xl font-bold transition-all",
-                "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
-                "hover:from-blue-600 hover:to-purple-600",
-                "transform hover:scale-[1.02] active:scale-[0.98]",
-                "shadow-lg focus:ring-4 focus:ring-primary/30 focus:outline-none"
-              )}
-            >
-              Valider mes réponses
-            </button>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={resetGame}
-                className={cn(
-                  "w-full py-3 sm:py-4 rounded-2xl text-lg sm:text-xl font-bold transition-all",
-                  "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
-                  "hover:from-blue-600 hover:to-purple-600",
-                  "transform hover:scale-[1.02] active:scale-[0.98]",
-                  "shadow-lg focus:ring-4 focus:ring-primary/30 focus:outline-none",
-                  "flex items-center justify-center gap-2"
-                )}
-              >
-                <RefreshCw className="h-5 w-5 sm:h-6 sm:w-6" />
-                Nouvelle partie
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className={cn(
-                  "w-full py-3 sm:py-4 rounded-2xl text-lg sm:text-xl font-bold transition-all",
-                  "bg-white text-blue-600 border-2 border-blue-200",
-                  "hover:bg-blue-50",
-                  "transform hover:scale-[1.02] active:scale-[0.98]",
-                  "shadow-lg focus:ring-4 focus:ring-primary/30 focus:outline-none"
-                )}
-              >
-                Retour à l'accueil
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="w-full lg:w-96 flex flex-col gap-6 order-first lg:order-last">
-          {isGameOver && (
-            <div className="bg-white/80 rounded-3xl p-8 shadow-xl border-2 border-blue-200 text-center">
-              <div className="text-6xl font-bold text-blue-600 mb-4">
-                {score}/20
-              </div>
-              <p className="text-2xl text-blue-600 mb-6">
-                {score === 20 ? "🎉 Parfait ! Tu es un champion !" : 
-                 score >= 15 ? "👏 Excellent ! Continue comme ça !" :
-                 score >= 10 ? "👍 Bien joué ! Tu progresses !" :
-                 "💪 Ne t'inquiète pas, continue à t'entraîner !"}
-              </p>
-              <div className="text-lg text-blue-500">
-                {multiplications.filter(m => parseInt(m.userAnswer) !== m.answer).length} erreurs
-              </div>
-            </div>
-          )}
-          <ScoreTable />
-        </div>
+        </main>
       </div>
-    </div>
+    </RequireAuth>
   );
 };
 

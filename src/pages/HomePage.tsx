@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
-import { Sparkles, Calculator, Timer, BookOpen, Globe, Grid } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Sparkles, Calculator, Timer, BookOpen, Globe, Grid, LogIn, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUser } from '../context/UserContext';
 
 const games = [
   {
@@ -46,12 +47,40 @@ const games = [
 ];
 
 export default function HomePage() {
+  const { user, logout } = useUser();
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+        {/* Header avec bouton Connexion/Déconnexion */}
+        <div className="flex justify-end items-center mb-4">
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-blue-700 font-semibold">{user.pseudo}</span>
+              <button
+                onClick={logout}
+                className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold transition"
+                title="Déconnexion"
+              >
+                <LogOut className="w-4 h-4" /> Déconnexion
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate('/login')}
+              className="flex items-center gap-1 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-bold transition"
+              title="Connexion"
+            >
+              <LogIn className="w-4 h-4" /> Connexion
+            </button>
+          )}
+        </div>
         <div className="text-center mb-8 sm:mb-12 relative">
           <h1 className="text-3xl sm:text-5xl font-display font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-4">
-            RedouaneMania
+            <span className="text-red-600">Red</span>
+            <span className="text-gray-500">①</span>
+            <span className="text-green-600">Mania</span>
           </h1>
           <p className="text-base sm:text-xl text-blue-600 mb-4 sm:mb-6">
             Bienvenue dans votre espace de jeux et de révision !
