@@ -1,65 +1,45 @@
 import React from 'react';
-import { useGameContext } from '../context/GameContext.tsx';
-import { Star, Clock, CheckCircle } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { Trophy } from 'lucide-react';
 
-const ScoreTable = () => {
-  const { highScores, username } = useGameContext();
+interface GameResult {
+  username: string;
+  score: number;
+  date: string;
+  multiplications: any[];
+}
 
-  if (highScores.length === 0) {
-    return (
-      <div className="text-center text-muted-foreground py-8">
-        Aucun score enregistré
-      </div>
-    );
-  }
+interface ScoreTableProps {
+  results: GameResult[];
+  username: string;
+  formatDate: (dateString: string) => string;
+}
+
+const ScoreTable: React.FC<ScoreTableProps> = ({ results, username, formatDate }) => {
+  const userResults = results
+    .filter(result => result.username === username)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
-    <div className="glass-panel rounded-2xl p-8">
-      <h2 className="text-xl font-bold mb-6">Meilleurs scores</h2>
-      
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="text-left text-sm text-muted-foreground border-b">
-              <th className="pb-3">Joueur</th>
-              <th className="pb-3 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <span>Points</span>
-                </div>
-              </th>
-              <th className="pb-3 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Score</span>
-                </div>
-              </th>
-              <th className="pb-3 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Clock className="h-4 w-4 text-blue-500" />
-                  <span>Temps</span>
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {highScores.map((score, index) => (
-              <tr 
-                key={index}
-                className={cn(
-                  "border-b last:border-0",
-                  score.username === username && "bg-primary/5"
-                )}
-              >
-                <td className="py-3">{score.username}</td>
-                <td className="py-3 text-center font-medium">{score.points}</td>
-                <td className="py-3 text-center">{score.score}/10</td>
-                <td className="py-3 text-center">{score.time.toFixed(1)}s</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="bg-white/80 rounded-2xl p-6 shadow-xl border-2 border-blue-200">
+      <h3 className="text-2xl font-bold text-blue-600 mb-4">Mon historique</h3>
+      <div className="space-y-3">
+        {userResults.map((result, index) => (
+          <div
+            key={index}
+            className="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm border border-blue-100 hover:scale-[1.02] transition-transform"
+          >
+            <div className="flex items-center gap-3">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              <span className="text-lg text-blue-600">{formatDate(result.date)}</span>
+            </div>
+            <span className="text-xl font-bold text-blue-600">{result.score}/20</span>
+          </div>
+        ))}
+        {userResults.length === 0 && (
+          <div className="text-center text-blue-500 py-6 text-lg">
+            Aucun résultat enregistré
+          </div>
+        )}
       </div>
     </div>
   );

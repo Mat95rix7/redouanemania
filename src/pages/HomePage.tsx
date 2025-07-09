@@ -22,11 +22,11 @@ const games = [
   },
   {
     id: 3,
-    title: 'Jeu de conjugaison',
-    description: 'Améliorez votre conjugaison avec des exercices interactifs et suivez votre progression',
+    title: 'Grille de Multiplication',
+    description: 'Trouvez les résultats de la table de multiplication dans une grille de nombres !',
     path: '/game3',
-    icon: BookOpen,
-    color: 'from-pink-500 to-yellow-500'
+    icon: Grid,
+    color: 'from-green-500 to-blue-500'
   },
   {
     id: 4,
@@ -38,12 +38,13 @@ const games = [
   },
   {
     id: 5,
-    title: 'Grille de Multiplication',
-    description: 'Trouvez les résultats de la table de multiplication dans une grille de nombres !',
+    title: 'Jeu de conjugaison',
+    description: 'Améliorez votre conjugaison avec des exercices interactifs et suivez votre progression',
     path: '/game5',
-    icon: Grid,
-    color: 'from-green-500 to-blue-500'
-  }
+    icon: BookOpen,
+    color: 'from-pink-500 to-yellow-500'
+  },
+
 ];
 
 export default function HomePage() {
