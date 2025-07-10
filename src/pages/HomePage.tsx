@@ -44,7 +44,6 @@ const games = [
     icon: BookOpen,
     color: 'from-pink-500 to-yellow-500'
   },
-
 ];
 
 export default function HomePage() {

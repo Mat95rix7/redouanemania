@@ -73,8 +73,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userRef = doc(db, 'users', user.pseudo);
     // Récupérer les anciens scores (tableau ou undefined)
     const prevScores = Array.isArray(user.scores[gameKey]) ? user.scores[gameKey] : (typeof user.scores[gameKey] === 'number' ? [user.scores[gameKey]] : []);
-    // Ajouter le nouveau score, trier et garder les 3 meilleurs
-    const newScores = [...prevScores, score].sort((a, b) => b - a).slice(0, 3);
+    // Ajouter le nouveau score seulement s'il n'existe pas déjà
+    let newScores = prevScores.includes(score) ? prevScores : [...prevScores, score];
+    // Trier et garder les 3 meilleurs
+    newScores = newScores.sort((a, b) => b - a).slice(0, 3);
     await updateDoc(userRef, {
       [`scores.${gameKey}`]: newScores
     });

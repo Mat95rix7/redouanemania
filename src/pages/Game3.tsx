@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Calculator, Trophy, Clock } from 'lucide-react';
+import { ArrowLeft, Sparkles, Calculator, Trophy, Clock, X } from 'lucide-react';
 import { useGameContext } from '../context/GameContext.tsx';
 import { cn } from '@/lib/utils';
 import RequireAuth from '../components/RequireAuth';
 import HeaderJeu from '../components/HeaderJeu';
+import RankingsSection from '../components/RankingsSection';
+import { useUser } from '../context/UserContext';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 const Game3 = () => {
   const navigate = useNavigate();
@@ -21,6 +25,21 @@ const Game3 = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
   const [wrongAnswers, setWrongAnswers] = useState(0);
+  const [showResultsModal, setShowResultsModal] = useState(false);
+  const [animatedScore, setAnimatedScore] = useState(0);
+  const scoreIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Calcul du score final (doit être ici AVANT les useEffect)
+  const base = 1000;
+  const difficultyBonus = availableCorrectAnswers.length * 10;
+  const timePenalty = elapsedTime * 5;
+  const errorPenalty = wrongAnswers * 20;
+  const finalScore = Math.max(0, base + difficultyBonus - timePenalty - errorPenalty);
+
+  // Ajout pour le classement top scores Game3
+  const [topScores, setTopScores] = useState<{pseudo: string, score: number}[]>([]);
+  const [myScores, setMyScores] = useState<{score: number}[]>([]);
+  const { user, updateScore } = useUser();
 
   useEffect(() => {
     if (startTime && !isGameOver) {
@@ -31,6 +50,73 @@ const Game3 = () => {
       return () => clearInterval(interval);
     }
   }, [startTime, isGameOver]);
+
+  useEffect(() => {
+    // Récupérer les scores depuis Firestore (top scores et mes scores)
+    const fetchScores = async () => {
+      const usersRef = collection(db, 'users');
+      const snapshot = await getDocs(usersRef);
+      // Récupérer tous les scores de tous les utilisateurs pour game3
+      const allScores: { pseudo: string, score: number }[] = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.scores && data.scores.game3) {
+          if (Array.isArray(data.scores.game3)) {
+            data.scores.game3.forEach((score: number) => {
+              allScores.push({ pseudo: data.pseudo, score });
+            });
+          } else if (typeof data.scores.game3 === 'number') {
+            allScores.push({ pseudo: data.pseudo, score: data.scores.game3 });
+          }
+        }
+      });
+      allScores.sort((a, b) => b.score - a.score);
+      setTopScores(allScores.slice(0, 5));
+      // Mes scores
+      if (user?.pseudo) {
+        setMyScores(allScores.filter(r => r.pseudo === user.pseudo).map(r => ({ score: r.score })));
+      }
+    };
+    fetchScores();
+  }, [user]);
+
+  // Enregistrer le score dans Firebase à la fin de la partie
+  useEffect(() => {
+    if (isGameOver && finalScore > 0 && user) {
+      updateScore('game3', finalScore);
+    }
+    // eslint-disable-next-line
+  }, [isGameOver]);
+
+  // Afficher le popup quand la partie est terminée
+  useEffect(() => {
+    if (isGameOver) {
+      setShowResultsModal(true);
+    }
+  }, [isGameOver]);
+
+  // Animation du score dans le popup
+  useEffect(() => {
+    if (showResultsModal) {
+      setAnimatedScore(0);
+      if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
+      let current = 0;
+      const step = Math.max(1, Math.floor(finalScore / 40));
+      scoreIntervalRef.current = setInterval(() => {
+        current += step;
+        if (current >= finalScore) {
+          setAnimatedScore(finalScore);
+          if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
+        } else {
+          setAnimatedScore(current);
+        }
+      }, 12);
+    } else {
+      setAnimatedScore(0);
+      if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
+    }
+    // eslint-disable-next-line
+  }, [showResultsModal, finalScore]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -202,7 +288,44 @@ const Game3 = () => {
 
   return (
     <RequireAuth>
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 py-4 sm:py-8 px-2 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 py-4 sm:py-8 px-2 sm:px-6 lg:px-8 relative">
+        {/* MODAL RESULTATS */}
+        {showResultsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in">
+            <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-auto scale-100 animate-scale-in">
+              <button
+                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition"
+                onClick={() => setShowResultsModal(false)}
+                aria-label="Fermer"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <h2 className="text-2xl font-bold text-center mb-4 text-green-700">Résultats</h2>
+              <div className="flex flex-col gap-3 mb-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-gray-600">Temps :</span>
+                  <span className="font-bold text-blue-700">{formatTime(elapsedTime)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-gray-600">Erreurs :</span>
+                  <span className="font-bold text-red-600">{wrongAnswers}</span>
+                </div>  
+              </div>
+              <div className="flex flex-col items-center mb-4">
+                <span className="text-lg text-gray-500 font-semibold">Score</span>
+                <span className="text-5xl sm:text-7xl font-extrabold text-yellow-400 drop-shadow-lg animate-pulse transition-all duration-500">
+                  {animatedScore}
+                </span>
+              </div>
+              <button
+                className="w-full mt-2 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-lg shadow hover:from-green-600 hover:to-emerald-600 transition"
+                onClick={() => setShowResultsModal(false)}
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        )}
         <main className="flex-1 container max-w-4xl mx-auto px-6 py-8">
           <HeaderJeu />
           <div className="mt-8">
@@ -312,7 +435,7 @@ const Game3 = () => {
                   {isGameOver && (
                     <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg sm:rounded-xl border-2 border-green-200 animate-fade-in">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
-                        <h3 className="text-lg sm:text-xl font-bold text-green-700">Résultats trouvés dans la grille</h3>
+                        <h3 className="text-lg sm:text-xl font-bold text-green-700">Résultats :</h3>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                           <div className="text-sm sm:text-lg text-green-700 bg-white/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border-2 border-green-200">
                             Temps : {formatTime(elapsedTime)}
@@ -320,8 +443,9 @@ const Game3 = () => {
                           <div className="text-sm sm:text-lg text-green-700 bg-white/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border-2 border-green-200">
                             Erreurs : {wrongAnswers}
                           </div>
-                          <div className="text-sm sm:text-lg text-green-700 bg-white/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border-2 border-green-200">
-                            Difficulté : {availableCorrectAnswers.length} résultats
+
+                          <div className="text-sm sm:text-lg text-green-700 bg-yellow-100 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border-2 border-yellow-300 font-bold">
+                            Score : {finalScore}
                           </div>
                         </div>
                       </div>
@@ -340,6 +464,16 @@ const Game3 = () => {
             </div>
           </div>
         </main>
+        <div className="w-full bg-transparent flex justify-center">
+          <div className="container max-w-4xl mx-auto px-6 pb-8">
+            <RankingsSection
+              show={true}
+              onToggle={() => {}}
+              myTopScores={myScores}
+              topScores={topScores}
+            />
+          </div>
+        </div>
       </div>
     </RequireAuth>
   );

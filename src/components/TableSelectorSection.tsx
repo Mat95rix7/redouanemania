@@ -55,7 +55,7 @@ const TableSelectorSection: React.FC<TableSelectorSectionProps> = ({
         onSelectTable={onSelectTable}
       />
     </div>
-    <div className="mt-12 flex justify-center animate-scale-in">
+    <div className="mt-12 mb-8 flex justify-center animate-scale-in">
       <button
         onClick={!isStartDisabled ? onStartQuiz : undefined}
         className={cn(

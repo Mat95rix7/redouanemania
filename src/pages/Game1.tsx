@@ -223,13 +223,17 @@ const Game1 = () => {
               onStartQuiz={handleStartQuiz}
               isStartDisabled={selectedTables.length === 0}
             />
-            <RankingsSection
-              show={showRankings}
-              onToggle={() => setShowRankings(v => !v)}
-              myTopScores={myTopScores}
-              topScores={topScores}
-            />
           </main>
+          <div className="w-full bg-transparent flex justify-center">
+            <div className="container max-w-4xl mx-auto px-6 pb-8">
+              <RankingsSection
+                show={showRankings}
+                onToggle={() => setShowRankings(v => !v)}
+                myTopScores={myTopScores}
+                topScores={topScores}
+              />
+            </div>
+          </div>
         </div>
       </RequireAuth>
     );
@@ -270,14 +274,18 @@ const Game1 = () => {
   if (step === 'results') {
     return (
       <RequireAuth>
-        <HeaderJeu />
-        <ResultsSection
-          animatedScore={animatedScore}
-          myTopScores={myTopScores}
-          topScores={topScores}
-          onRestart={handleRestart}
-          onHome={handleHome}
-        />
+        <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
+          <main className="flex-1 container max-w-4xl mx-auto px-6 py-8">
+            <HeaderJeu />
+            <ResultsSection
+              animatedScore={animatedScore}
+              myTopScores={myTopScores}
+              topScores={topScores}
+              onRestart={handleRestart}
+              onHome={handleHome}
+            />
+          </main>
+        </div>
       </RequireAuth>
     );
   }
