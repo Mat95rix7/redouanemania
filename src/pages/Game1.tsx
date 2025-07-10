@@ -83,7 +83,7 @@ const Game1 = () => {
         allScores.sort((a, b) => b.score - a.score);
         // Debug log
         console.log('Top 3 global récupérés:', allScores.slice(0, 3));
-        setTopScores(allScores.slice(0, 3));
+        setTopScores(allScores.slice(0, 5));
       };
       fetchTopScores();
     }
