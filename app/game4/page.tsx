@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, Globe, Clock, Trophy, Star } from 'lucide-react';
+import { Sparkles, Globe, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import EnglishConjugationGame from '@/components/EnglishConjugationGame';
 import { englishVerbs } from '@/data/englishConjugationData';
@@ -10,9 +10,8 @@ import HeaderJeu from '@/components/HeaderJeu';
 
 /* ================= TYPES ================= */
 
-type Verb = keyof typeof englishVerbs;
-type Tense = 'present' | 'past' | 'future';
-type Conjugation = (typeof englishVerbs)[Verb][Tense];
+export type Verb = keyof typeof englishVerbs;
+export type Tense = 'present' | 'past' | 'future';
 
 /* ================= COMPONENT ================= */
 
