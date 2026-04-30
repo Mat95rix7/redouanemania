@@ -36,7 +36,7 @@ export default function Game5() {
 
   /* ================= HANDLERS ================= */
 
-  const handleVerbSelect = (verb: Verb) => {
+  const handleVerbSelect = (verb: Verbe) => {
     setIsAnimating(true);
     setTimeout(() => {
       setSelectedVerb(verb);
