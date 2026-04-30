@@ -9,9 +9,13 @@ import { englishVerbs } from '@/data/englishConjugationData';
 import RequireAuth from '@/components/RequireAuth';
 import HeaderJeu from '@/components/HeaderJeu';
 
+type Verb = keyof typeof englishVerbs
+type Tense = "present" | "past" | "future"
+type Conjugation = (typeof englishVerbs)[Verb][Tense]
+
 export default function Game4() {
-  const [selectedVerb, setSelectedVerb] = useState<string | null>(null);
-  const [selectedTense, setSelectedTense] = useState<'present' | 'past' | 'future' | null>(null);
+  const [selectedVerb, setSelectedVerb] = useState<Verb | null>(null);
+  const [selectedTense, setSelectedTense] = useState<Tense | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showStars, setShowStars] = useState(false);
 
