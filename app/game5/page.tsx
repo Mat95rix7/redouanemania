@@ -14,7 +14,7 @@ import HeaderJeu from '@/components/HeaderJeu';
 
 export type Verbe = keyof typeof conjugaisons;
 type Mode = keyof (typeof conjugaisons)[Verbe];
-type IndicatifTemps = keyof (typeof conjugaisons)[Verbe]['indicatif'];
+export type IndicatifTemps = keyof (typeof conjugaisons)[Verbe]['indicatif'];
 type Conjugation =
   (typeof conjugaisons)[Verbe]['indicatif'][IndicatifTemps];
 

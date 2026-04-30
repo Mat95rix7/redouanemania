@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { Pronom, ConjugaisonParTemps } from '../types';
 import { cn } from '../lib/utils';
-import { Verb, IndicatifTemps } from '@/app/game5/page';
+import { IndicatifTemps, Verbe } from '@/app/game5/page';
 
 interface ConjugaisonGameProps {
-  verb: Verb;
+  verb: Verbe;
   temps: IndicatifTemps;
   conjugationData: ConjugaisonParTemps;
   onReset?: () => void;
