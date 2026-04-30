@@ -1,28 +1,36 @@
-# Application éducative pour enfants
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Bienvenue sur notre application éducative destinée aux enfants !  
-L'objectif est d'apprendre en s'amusant grâce à différents jeux et exercices interactifs.
+## Getting Started
 
-## Fonctionnalités
+First, run the development server:
 
-- **Calcul mental** : Résous des opérations mathématiques pour améliorer ta rapidité et ta logique.
-- **Conjugaison** : Exerce-toi à conjuguer des verbes français à différents temps.
-- **Jeux ludiques** : Découvre d'autres activités pour apprendre tout en t'amusant.
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-## Pour qui ?
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Cette application s'adresse principalement aux enfants du primaire, mais peut convenir à tous ceux qui souhaitent réviser de façon ludique.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Comment jouer ?
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-1. Choisis une catégorie (calcul, conjugaison, etc.).
-2. Réponds aux questions ou résous les exercices proposés.
-3. Gagne des points et essaie d'améliorer ton score à chaque partie !
+## Learn More
 
-## Objectif
+To learn more about Next.js, take a look at the following resources:
 
-Favoriser l'apprentissage et la révision des fondamentaux scolaires tout en rendant l'expérience amusante et motivante.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
----
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-Amuse-toi bien et progresse chaque jour !
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
