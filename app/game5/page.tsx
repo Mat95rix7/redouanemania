@@ -9,20 +9,17 @@ import ConjugaisonGame from '@/components/ConjugaisonGame';
 import conjugaisons from '@/data/conjugaisonData';
 import RequireAuth from '@/components/RequireAuth';
 import HeaderJeu from '@/components/HeaderJeu';
+import type { Temps } from '@/types';
 
 /* ================= TYPES ================= */
 
 export type Verbe = keyof typeof conjugaisons;
-type Mode = keyof (typeof conjugaisons)[Verbe];
-export type IndicatifTemps = keyof (typeof conjugaisons)[Verbe]['indicatif'];
-type Conjugation =
-  (typeof conjugaisons)[Verbe]['indicatif'][IndicatifTemps];
 
 /* ================= COMPONENT ================= */
 
 export default function Game5() {
   const [selectedVerb, setSelectedVerb] = useState<Verbe | null>(null);
-  const [selectedTemps, setSelectedTemps] = useState<IndicatifTemps | null>(null);
+  const [selectedTemps, setSelectedTemps] = useState<Temps | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showStars, setShowStars] = useState(false);
 
@@ -34,8 +31,6 @@ export default function Game5() {
     }))
   );
 
-  /* ================= HANDLERS ================= */
-
   const handleVerbSelect = (verb: Verbe) => {
     setIsAnimating(true);
     setTimeout(() => {
@@ -45,7 +40,7 @@ export default function Game5() {
     }, 300);
   };
 
-  const handleTempsSelect = (temps: IndicatifTemps) => {
+  const handleTempsSelect = (temps: Temps) => {
     setIsAnimating(true);
     setTimeout(() => {
       setSelectedTemps(temps);
@@ -63,8 +58,6 @@ export default function Game5() {
       setIsAnimating(false);
     }, 300);
   };
-
-  /* ================= RENDER ================= */
 
   return (
     <RequireAuth>
@@ -89,62 +82,38 @@ export default function Game5() {
               </div>
             </div>
 
-            <div
-              className={cn(
-                'transition-all duration-300 relative',
-                isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-              )}
-            >
+            <div className={cn('transition-all duration-300 relative', isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100')}>
               {showStars && (
                 <div className="absolute inset-0 pointer-events-none">
                   {floatingElements.map((el, i) => (
-                    <div
-                      key={i}
-                      className="absolute animate-float"
-                      style={{
-                        left: `${el.left}%`,
-                        top: `${el.top}%`,
-                        animationDelay: `${el.delay}s`,
-                      }}
-                    >
+                    <div key={i} className="absolute animate-float" style={{ left: `${el.left}%`, top: `${el.top}%`, animationDelay: `${el.delay}s` }}>
                       <Star className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400" />
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* ===== STEP 1 : VERB ===== */}
               {!selectedVerb && (
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 shadow-xl border-2 border-blue-200">
-                  <VerbSelection
-                    onSelect={handleVerbSelect}
-                  />
+                  <VerbSelection onSelect={handleVerbSelect} />
                 </div>
               )}
 
-              {/* ===== STEP 2 : TEMPS ===== */}
               {selectedVerb && !selectedTemps && (
                 <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 shadow-xl border-2 border-purple-200">
                   <TempsSelection
-                    temps={
-                      Object.keys(
-                        conjugaisons[selectedVerb].indicatif
-                      ) as IndicatifTemps[]
-                    }
+                    temps={Object.keys(conjugaisons[selectedVerb].indicatif ?? {}) as Temps[]}
                     onSelect={handleTempsSelect}
                   />
                 </div>
               )}
 
-              {/* ===== GAME ===== */}
               {selectedVerb && selectedTemps && (
                 <div className="bg-gradient-to-br from-pink-50 to-yellow-50 rounded-2xl p-6 shadow-xl border-2 border-pink-200">
                   <ConjugaisonGame
                     verb={selectedVerb}
                     temps={selectedTemps}
-                    conjugationData={
-                      conjugaisons[selectedVerb].indicatif[selectedTemps]
-                    }
+                    conjugationData={conjugaisons[selectedVerb].indicatif?.[selectedTemps]!}
                     onReset={handleReset}
                   />
                 </div>

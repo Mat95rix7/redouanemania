@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Pronom, ConjugaisonParTemps } from '../types';
-import { cn } from '../lib/utils';
-import { IndicatifTemps, Verbe } from '@/app/game5/page';
+import { cn } from '@/lib/utils';
+import type { Pronom, ConjugaisonParTemps, Temps } from '@/types';
+import type { Verbe } from '@/app/game5/page';
 
 interface ConjugaisonGameProps {
   verb: Verbe;
-  temps: IndicatifTemps;
+  temps: Temps;
   conjugationData: ConjugaisonParTemps;
   onReset?: () => void;
 }
@@ -40,7 +40,7 @@ const ConjugaisonGame: React.FC<ConjugaisonGameProps> = ({
     useState<ConjugaisonParTemps>(emptyAnswers);
 
   const [validatedAnswers, setValidatedAnswers] =
-    useState<Record<Pronom, boolean>>({} as Record<Pronom, boolean>);
+    useState<Partial<Record<Pronom, boolean>>>({});
 
   const [message, setMessage] = useState<{
     text: string;
@@ -50,15 +50,13 @@ const ConjugaisonGame: React.FC<ConjugaisonGameProps> = ({
   const [showResult, setShowResult] =
     useState<'correct' | 'incorrect' | null>(null);
 
-  /* ===== RESET ON CHANGE ===== */
   useEffect(() => {
     setUserAnswers(emptyAnswers());
-    setValidatedAnswers({} as Record<Pronom, boolean>);
+    setValidatedAnswers({});
     setMessage(null);
     setShowResult(null);
   }, [conjugationData, verb, temps]);
 
-  /* ===== HELPERS ===== */
   const normalize = (v: string) =>
     v
       .toLowerCase()
@@ -67,10 +65,9 @@ const ConjugaisonGame: React.FC<ConjugaisonGameProps> = ({
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '');
 
-  /* ===== CHECK ===== */
   const checkAnswers = () => {
     let allCorrect = true;
-    const result = {} as Record<Pronom, boolean>;
+    const result: Partial<Record<Pronom, boolean>> = {};
 
     PRONOMS_ORDER.forEach((p) => {
       const ok =
@@ -86,42 +83,23 @@ const ConjugaisonGame: React.FC<ConjugaisonGameProps> = ({
     setMessage(
       allCorrect
         ? { text: 'Bravo ! Toutes les réponses sont correctes !', type: 'success' }
-        : {
-            text: 'Certaines réponses sont incorrectes.',
-            type: 'error',
-          }
+        : { text: 'Certaines réponses sont incorrectes.', type: 'error' }
     );
   };
 
-  /* ===== RESET ===== */
   const resetGame = () => {
     setUserAnswers(emptyAnswers());
-    setValidatedAnswers({} as Record<Pronom, boolean>);
+    setValidatedAnswers({});
     setMessage(null);
     setShowResult(null);
     onReset?.();
   };
 
-  /* ===== RENDER ===== */
   return (
     <div className="space-y-6 relative">
       {showResult && (
-        <div
-          className={cn(
-            'absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-lg z-10',
-            showResult === 'correct'
-              ? 'bg-green-500/20'
-              : 'bg-red-500/20'
-          )}
-        >
-          <div
-            className={cn(
-              'text-6xl font-bold',
-              showResult === 'correct'
-                ? 'text-green-500'
-                : 'text-red-500'
-            )}
-          >
+        <div className={cn('absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-lg z-10', showResult === 'correct' ? 'bg-green-500/20' : 'bg-red-500/20')}>
+          <div className={cn('text-6xl font-bold', showResult === 'correct' ? 'text-green-500' : 'text-red-500')}>
             {showResult === 'correct' ? 'Correct !' : 'Incorrect !'}
           </div>
         </div>
@@ -134,17 +112,12 @@ const ConjugaisonGame: React.FC<ConjugaisonGameProps> = ({
             <input
               value={userAnswers[p]}
               onChange={(e) =>
-                setUserAnswers((prev) => ({
-                  ...prev,
-                  [p]: e.target.value,
-                }))
+                setUserAnswers((prev) => ({ ...prev, [p]: e.target.value }))
               }
               className={cn(
                 'flex-1 px-4 py-2 border rounded-lg',
-                validatedAnswers[p] === true &&
-                  'bg-green-50 border-green-500',
-                validatedAnswers[p] === false &&
-                  'bg-red-50 border-red-500'
+                validatedAnswers[p] === true && 'bg-green-50 border-green-500',
+                validatedAnswers[p] === false && 'bg-red-50 border-red-500'
               )}
             />
           </div>
@@ -152,29 +125,16 @@ const ConjugaisonGame: React.FC<ConjugaisonGameProps> = ({
       </div>
 
       {message && (
-        <div
-          className={cn(
-            'p-4 rounded-lg text-center',
-            message.type === 'success'
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
-          )}
-        >
+        <div className={cn('p-4 rounded-lg text-center', message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
           {message.text}
         </div>
       )}
 
       <div className="flex justify-center gap-4">
-        <button
-          onClick={checkAnswers}
-          className="px-6 py-2 text-white bg-blue-600 rounded-lg"
-        >
+        <button onClick={checkAnswers} className="px-6 py-2 text-white bg-blue-600 rounded-lg">
           Vérifier
         </button>
-        <button
-          onClick={resetGame}
-          className="px-6 py-2 bg-gray-200 rounded-lg"
-        >
+        <button onClick={resetGame} className="px-6 py-2 bg-gray-200 rounded-lg">
           Réinitialiser
         </button>
       </div>
