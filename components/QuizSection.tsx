@@ -15,7 +15,7 @@ interface QuizSectionProps {
   points: number;
   totalTime: number;
   correctCount: number;
-  inputRef: React.RefObject<HTMLInputElement>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 const QuizSection: React.FC<QuizSectionProps> = ({
