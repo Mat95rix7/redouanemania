@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '../config/firebase';
 import { collection, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
@@ -20,16 +20,14 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialisation lazy : la fonction ne s'exécute qu'une seule fois au montage
   const [user, setUser] = useState<User | null>(() => {
     if (typeof window === 'undefined') return null;
     const saved = localStorage.getItem('user');
     return saved ? JSON.parse(saved) : null;
   });
-  
+
   const [loading, setLoading] = useState(false);
 
-  // Synchronisation avec localStorage uniquement quand user change
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
@@ -38,7 +36,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user]);
 
-  // Login par pseudo (vérifie unicité, crée ou charge l'utilisateur)
   const login = async (pseudo: string) => {
     setLoading(true);
     const usersRef = collection(db, 'users');
@@ -53,11 +50,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     } else {
       await setDoc(userDoc, { pseudo, scores: {} });
-      setUser({
-        uid: pseudo,
-        pseudo,
-        scores: {},
-      });
+      setUser({ uid: pseudo, pseudo, scores: {} });
     }
     setLoading(false);
   };
@@ -67,26 +60,29 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('user');
   };
 
-  // Met à jour le score d'un jeu dans Firestore et dans le contexte utilisateur
   const updateScore = async (gameKey: string, score: number) => {
     if (!user) return;
     const userRef = doc(db, 'users', user.pseudo);
-    // Récupérer les anciens scores (tableau ou undefined)
-    const prevScores = Array.isArray(user.scores[gameKey]) ? user.scores[gameKey] : (typeof user.scores[gameKey] === 'number' ? [user.scores[gameKey]] : []);
-    // Ajouter le nouveau score seulement s'il n'existe pas déjà
-    let newScores = prevScores.includes(score) ? prevScores : [...prevScores, score];
-    // Trier et garder les 3 meilleurs
+    const prevScores: number[] = Array.isArray(user.scores[gameKey])
+      ? user.scores[gameKey]
+      : typeof user.scores[gameKey] === 'number'
+      ? [user.scores[gameKey] as unknown as number]
+      : [];
+
+    let newScores = prevScores.includes(score)
+      ? prevScores
+      : [...prevScores, score];
     newScores = newScores.sort((a, b) => b - a).slice(0, 3);
+
     await updateDoc(userRef, {
-      [`scores.${gameKey}`]: newScores
+      [`scores.${gameKey}`]: newScores,
     });
-    setUser((prev) => prev ? {
-      ...prev,
-      scores: {
-        ...prev.scores,
-        [gameKey]: newScores
-      }
-    } : prev);
+
+    setUser(prev =>
+      prev
+        ? { ...prev, scores: { ...prev.scores, [gameKey]: newScores } }
+        : prev
+    );
   };
 
   return (
