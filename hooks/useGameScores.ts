@@ -4,7 +4,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { useUser } from '@/context/UserContext';
 
-type TopScore = { username: string; score: number };
+type TopScore = { pseudo: string; score: number };
 
 export const useGameScores = (gameKey: 'game1' | 'game2') => {
   const { user, updateScore } = useUser();
@@ -19,10 +19,10 @@ export const useGameScores = (gameKey: 'game1' | 'game2') => {
       const gameScores = data.scores?.[gameKey];
       if (Array.isArray(gameScores)) {
         gameScores.forEach((score: number) => {
-          allScores.push({ username: data.username, score });
+          allScores.push({ pseudo: data.pseudo, score });
         });
       } else if (typeof gameScores === 'number') {
-        allScores.push({ username: data.username, score: gameScores });
+        allScores.push({ pseudo: data.pseudo, score: gameScores });
       }
     });
 
